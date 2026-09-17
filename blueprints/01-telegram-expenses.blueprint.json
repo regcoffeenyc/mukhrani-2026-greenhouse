@@ -85,7 +85,7 @@
                     "flow": [
                         {
                             "id": 6,
-                            "module": "anthropic-claude:createMessage",
+                            "module": "anthropic-claude:createAMessage",
                             "version": 1,
                             "parameters": { "__IMTCONN__": null },
                             "filter": {
@@ -240,7 +240,7 @@
         "zone": "eu1.make.com",
         "notes": [
             "Replace three placeholders before the first run: <<OWNER_CHAT_ID>>, <<LEDGER_SPREADSHEET_ID>>, and the system prompt in module 6.",
-            "Module identifiers here are the ones already in production in the tactical-shop scenarios. The Telegram TRIGGER is deliberately a plain gateway webhook rather than a Telegram app trigger — it needs no polling and no extra connection.",
+            "Module identifiers verified against the Make API on 17 Sep 2026: anthropic-claude:createAMessage (NOT createMessage), google-sheets:addRow/filterRows v2, telegram:SendReplyMessage v1. The Telegram TRIGGER is deliberately a plain gateway webhook rather than a Telegram app trigger — it needs no polling and no extra connection.",
             "sequential: true matters. Two expenses sent a second apart must not race each other into the same sheet row."
         ]
     }

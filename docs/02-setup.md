@@ -43,33 +43,45 @@ tab up by that name and will not find it otherwise.
 
 Do not reorder the columns — the bot writes by position, not by header.
 
-## 4. Import the scenario
+## 4. The scenario — already built
 
-In Make: **Scenarios → Create new → ⋯ → Import Blueprint** →
-`blueprints/01-telegram-expenses.blueprint.json`.
+It exists in Make, **switched off**, with the Anthropic and Google connections
+already attached and the ledger id and system prompt already filled in:
 
-Then connect the three apps it uses:
-
-| Module | Connection |
+| | |
 |---|---|
-| Claude: parse the expense | Anthropic — your API key |
-| Read ledger / Append to ledger | Google Sheets — the account that owns the sheet |
-| Reply modules | Telegram Bot — the token from step 1 |
+| Scenario | **Mukhrani 2026 — Greenhouse expenses (Telegram)**, id `7471723` |
+| Webhook URL | `https://hook.eu1.make.com/jok35l9zggg7dqpqt6bzl6ms8i7pie9u` |
+| Anthropic | `GTM Anthropic (agent brain)` — attached |
+| Google Sheets | `My Google connection` — attached |
+| Telegram | **not attached — this is yours to do** |
 
-## 5. Replace the three placeholders
+`blueprints/01-telegram-expenses.blueprint.json` is the same flow, kept in the
+repo so the scenario can be rebuilt or reviewed without opening Make.
 
-| Placeholder | Where | Value |
-|---|---|---|
-| `<<OWNER_CHAT_ID>>` | module 2, the filter | your chat id from step 2 |
-| `<<LEDGER_SPREADSHEET_ID>>` | modules 4 and 8 | `1NULNFpgxhzAqM7IWPr8-gxtRbqQ4MxMXgyNwrDzktLE` |
-| `<<PASTE prompts/…>>` | module 6, System field | `prompts/00-conventions.md` then `prompts/01-expense-agent.md`, one after the other |
+## 5. What is left to do
+
+**a. Create the Telegram connection.** Make → **Connections** → **+ Add** →
+**Telegram Bot** → paste the BotFather token → name it
+`Mukhrani 2026 expenses bot` → Save.
+
+Then open the scenario and pick that connection in the three reply modules
+(*Reply: where we are*, *Reply: logged*, *Reply: ask*, *Reply: confirm first*).
+
+**b. Fill in the owner gate.** Open module 2 (*Gate + normalise text*), open its
+filter, and replace `<<OWNER_CHAT_ID>>` with your numeric chat id from step 2.
+
+Until you do, the filter matches nothing and the bot answers nobody — the safe
+failure, and the reason the scenario ships switched off.
+
+**c. Rename the sheet tab** to `expenses`, if you have not already (step 3).
 
 ## 6. Point Telegram at Make
 
-Open module 1, copy the webhook URL, then visit once in a browser:
+Visit this once in a browser, with your token in place of `<TOKEN>`:
 
 ```
-https://api.telegram.org/bot<TOKEN>/setWebhook?url=<MAKE_WEBHOOK_URL>
+https://api.telegram.org/bot<TOKEN>/setWebhook?url=https://hook.eu1.make.com/jok35l9zggg7dqpqt6bzl6ms8i7pie9u
 ```
 
 You should see `{"ok":true,"result":true,"description":"Webhook was set"}`.
