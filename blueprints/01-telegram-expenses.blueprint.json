@@ -1,0 +1,247 @@
+{
+    "name": "01 — Greenhouse expenses (Telegram)",
+    "flow": [
+        {
+            "id": 1,
+            "module": "gateway:CustomWebHook",
+            "version": 1,
+            "parameters": { "hook": null, "maxResults": 1 },
+            "mapper": {},
+            "metadata": {
+                "designer": { "x": 0, "y": 0, "name": "Telegram update" },
+                "notes": "Create the hook, copy its URL, then point the bot at it once: https://api.telegram.org/bot<TOKEN>/setWebhook?url=<THIS_URL>. Telegram posts the whole update object here, so 1.message.text, 1.message.chat.id, 1.message.photo[] and 1.message.caption are all available downstream. See docs/02-setup.md."
+            }
+        },
+        {
+            "id": 2,
+            "module": "util:SetVariable2",
+            "version": 1,
+            "parameters": {},
+            "filter": {
+                "name": "Owner only",
+                "conditions": [[{ "a": "{{1.message.chat.id}}", "o": "text:equal", "b": "<<OWNER_CHAT_ID>>" }]]
+            },
+            "mapper": {
+                "name": "msg",
+                "scope": "roundtrip",
+                "value": "{{ifempty(1.message.text; 1.message.caption)}}"
+            },
+            "metadata": {
+                "designer": { "x": 300, "y": 0, "name": "Gate + normalise text" },
+                "notes": "THE SECURITY GATE. Anything from another chat stops here and is never written. Replace <<OWNER_CHAT_ID>>: message the bot once, then open https://api.telegram.org/bot<TOKEN>/getUpdates and read message.chat.id. A photo carries its text in caption, not text — ifempty handles both."
+            }
+        },
+        {
+            "id": 3,
+            "module": "builtin:BasicRouter",
+            "version": 1,
+            "parameters": {},
+            "mapper": {},
+            "metadata": { "designer": { "x": 600, "y": 0, "name": "Command or expense?" } },
+            "routes": [
+                {
+                    "flow": [
+                        {
+                            "id": 4,
+                            "module": "google-sheets:filterRows",
+                            "version": 2,
+                            "parameters": { "__IMTCONN__": null },
+                            "filter": {
+                                "name": "Commands only",
+                                "conditions": [[{ "a": "{{2.msg}}", "o": "text:startwith", "b": "/" }]]
+                            },
+                            "mapper": {
+                                "mode": "select",
+                                "spreadsheetId": "<<LEDGER_SPREADSHEET_ID>>",
+                                "sheetId": "expenses",
+                                "includesHeaders": true,
+                                "filter": [[{ "a": "P", "b": "void", "o": "ne" }]],
+                                "sortOrder": "desc",
+                                "limit": 500
+                            },
+                            "metadata": {
+                                "designer": { "x": 900, "y": -150, "name": "Read ledger" },
+                                "notes": "Reads every live row (column P 'void' marks a cancelled one). 500 rows is far above anything this project will produce; raise it if the ledger ever grows past that."
+                            }
+                        },
+                        {
+                            "id": 5,
+                            "module": "telegram:SendReplyMessage",
+                            "version": 1,
+                            "parameters": { "__IMTCONN__": null },
+                            "mapper": {
+                                "chatId": "{{1.message.chat.id}}",
+                                "parseMode": "HTML",
+                                "text": "<b>ბიუჯეტი / Budget</b>\n\nბიუჯეტი: <b>625,000 ₾</b>\nდახარჯული: <b>{{formatNumber(sum(map(4.array; \"F\")); 2; \".\"; \",\")}} ₾</b>\nდარჩენილი: <b>{{formatNumber(625000 - sum(map(4.array; \"F\")); 2; \".\"; \",\")}} ₾</b>\nჩანაწერი: {{length(4.array)}}\n\nბოლო: {{get(4.array; \"1.A\")}} — {{get(4.array; \"1.B\")}} — {{get(4.array; \"1.F\")}} ₾"
+                            },
+                            "metadata": {
+                                "designer": { "x": 1200, "y": -150, "name": "Reply: where we are" },
+                                "notes": "Column F is amount_gel. The 625000 budget is written here rather than read from a cell so the bot still answers if the sheet is unreachable; if the facility ever changes, change it here and in finance/build_model.py."
+                            }
+                        }
+                    ]
+                },
+                {
+                    "flow": [
+                        {
+                            "id": 6,
+                            "module": "anthropic-claude:createMessage",
+                            "version": 1,
+                            "parameters": { "__IMTCONN__": null },
+                            "filter": {
+                                "name": "Not a command",
+                                "conditions": [[{ "a": "{{2.msg}}", "o": "text:notstartwith", "b": "/" }]]
+                            },
+                            "mapper": {
+                                "model": "claude-sonnet-4-6",
+                                "max_tokens": 1024,
+                                "temperature": 0,
+                                "system": "<<PASTE prompts/00-conventions.md THEN prompts/01-expense-agent.md>>",
+                                "messages": [
+                                    {
+                                        "role": "user",
+                                        "content": "Today is {{formatDate(now; \"YYYY-MM-DD\"; \"Asia/Tbilisi\")}}.\n\nOwner message:\n{{2.msg}}"
+                                    }
+                                ]
+                            },
+                            "metadata": {
+                                "designer": { "x": 900, "y": 150, "name": "Claude: parse the expense" },
+                                "notes": "temperature 0 — this is extraction, not writing. Today's date is passed in because the model has no clock. To read receipt photos, add the image as a second content block of type image; see docs/01-architecture.md."
+                            }
+                        },
+                        {
+                            "id": 7,
+                            "module": "json:ParseJSON",
+                            "version": 1,
+                            "parameters": { "type": null },
+                            "mapper": { "json": "{{6.content[].text}}" },
+                            "metadata": {
+                                "designer": { "x": 1200, "y": 150, "name": "Parse JSON" },
+                                "notes": "If this module errors the model broke the output contract. Attach an error handler that replies to the owner with the raw text rather than failing silently."
+                            }
+                        },
+                        {
+                            "id": 8,
+                            "module": "google-sheets:addRow",
+                            "version": 2,
+                            "parameters": { "__IMTCONN__": null },
+                            "filter": {
+                                "name": "Only a clean log_expense",
+                                "conditions": [[{ "a": "{{7.action}}", "o": "text:equal", "b": "log_expense" }]]
+                            },
+                            "mapper": {
+                                "mode": "select",
+                                "spreadsheetId": "<<LEDGER_SPREADSHEET_ID>>",
+                                "sheetId": "expenses",
+                                "includesHeaders": true,
+                                "insertDataOption": "INSERT_ROWS",
+                                "valueInputOption": "USER_ENTERED",
+                                "values": {
+                                    "0": "{{7.parameters.date}}",
+                                    "1": "{{7.parameters.description}}",
+                                    "2": "{{7.parameters.counterparty}}",
+                                    "3": "{{7.parameters.category}}",
+                                    "4": "{{7.parameters.treatment}}",
+                                    "5": "{{7.parameters.amount_gel}}",
+                                    "6": "{{7.parameters.currency}}",
+                                    "7": "{{7.parameters.amount_original}}",
+                                    "8": "{{7.parameters.fx_rate}}",
+                                    "9": "{{7.parameters.payment_method}}",
+                                    "10": "{{7.parameters.contract}}",
+                                    "11": "telegram",
+                                    "12": "{{1.message.from.username}}",
+                                    "13": "{{formatDate(now; \"YYYY-MM-DD HH:mm\"; \"Asia/Tbilisi\")}}",
+                                    "14": "{{7.parameters.confidence}}",
+                                    "15": "",
+                                    "16": "{{7.log_message}}"
+                                }
+                            },
+                            "metadata": {
+                                "designer": { "x": 1500, "y": 150, "name": "Append to ledger" },
+                                "notes": "Column order must match sheets/expenses-ledger-template.csv exactly. Column P (index 15) is the void flag — always written empty; only /undo fills it."
+                            }
+                        },
+                        {
+                            "id": 9,
+                            "module": "telegram:SendReplyMessage",
+                            "version": 1,
+                            "parameters": { "__IMTCONN__": null },
+                            "filter": {
+                                "name": "Logged",
+                                "conditions": [[{ "a": "{{7.action}}", "o": "text:equal", "b": "log_expense" }]]
+                            },
+                            "mapper": {
+                                "chatId": "{{1.message.chat.id}}",
+                                "parseMode": "HTML",
+                                "text": "✅ <b>ჩაიწერა / Logged</b>\n\n{{7.parameters.description}}\n<b>{{formatNumber(7.parameters.amount_gel; 2; \".\"; \",\")}} ₾</b> · {{7.parameters.category}} · {{7.parameters.treatment}}\n{{if(7.parameters.counterparty = \"\"; \"\"; 7.parameters.counterparty)}}\n{{7.parameters.date}}\n\n{{if(7.parameters.confidence < 0.8; \"⚠️ ვერ ვარ დარწმუნებული კატეგორიაში — შეასწორეთ ცხრილში თუ საჭიროა.\"; \"\")}}\n\n/balance — სად ვართ"
+                            },
+                            "metadata": { "designer": { "x": 1800, "y": 150, "name": "Reply: logged" } }
+                        },
+                        {
+                            "id": 10,
+                            "module": "telegram:SendReplyMessage",
+                            "version": 1,
+                            "parameters": { "__IMTCONN__": null },
+                            "filter": {
+                                "name": "Needs a question",
+                                "conditions": [[{ "a": "{{7.action}}", "o": "text:equal", "b": "ask_clarification" }]]
+                            },
+                            "mapper": {
+                                "chatId": "{{1.message.chat.id}}",
+                                "parseMode": "HTML",
+                                "text": "❓ {{7.parameters.question_ka}}\n\n<i>{{7.parameters.question_en}}</i>"
+                            },
+                            "metadata": {
+                                "designer": { "x": 1800, "y": 300, "name": "Reply: ask" },
+                                "notes": "Nothing is written on this path. The owner answers in the next message, which arrives as a fresh update — the agent is stateless, so the answer must repeat the amount."
+                            }
+                        },
+                        {
+                            "id": 11,
+                            "module": "telegram:SendReplyMessage",
+                            "version": 1,
+                            "parameters": { "__IMTCONN__": null },
+                            "filter": {
+                                "name": "Large or uncertain",
+                                "conditions": [[{ "a": "{{7.action}}", "o": "text:equal", "b": "confirm_first" }]]
+                            },
+                            "mapper": {
+                                "chatId": "{{1.message.chat.id}}",
+                                "parseMode": "HTML",
+                                "text": "⚠️ <b>დასადასტურებელია / Confirm</b>\n\n{{7.parameters.description}}\n<b>{{formatNumber(7.parameters.amount_gel; 2; \".\"; \",\")}} ₾</b> · {{7.parameters.category}}\n{{7.parameters.counterparty}}\n{{7.parameters.date}}\n\nდასადასტურებლად უპასუხეთ: <code>დიახ</code>",
+                                "replyMarkup": "{\"inline_keyboard\":[[{\"text\":\"✅ დიახ / Yes\",\"callback_data\":\"confirm\"},{\"text\":\"❌ არა / No\",\"callback_data\":\"cancel\"}]]}"
+                            },
+                            "metadata": {
+                                "designer": { "x": 1800, "y": 450, "name": "Reply: confirm first" },
+                                "notes": "THE MONEY GATE. Anything at or above 10,000 GEL, or parsed with low confidence, stops here until the owner taps. Wiring the callback back into this scenario is step 7 of docs/02-setup.md; until that is done the owner re-sends the message with the word 'დიახ' and it goes down the log_expense path."
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": 12,
+            "module": "gateway:WebhookRespond",
+            "version": 1,
+            "parameters": {},
+            "mapper": { "status": "200", "body": "ok", "headers": [] },
+            "metadata": {
+                "designer": { "x": 2100, "y": 0, "name": "200 to Telegram" },
+                "notes": "Telegram retries an update it gets no 200 for. Always respond, even on the paths that write nothing."
+            }
+        }
+    ],
+    "metadata": {
+        "instant": true,
+        "version": 1,
+        "scenario": { "roundtrips": 1, "maxErrors": 3, "autoCommit": true, "autoCommitTriggerLast": true, "sequential": true, "confidential": false, "dlq": false, "freshVariables": false },
+        "designer": { "orientation": "horizontal" },
+        "zone": "eu1.make.com",
+        "notes": [
+            "Replace three placeholders before the first run: <<OWNER_CHAT_ID>>, <<LEDGER_SPREADSHEET_ID>>, and the system prompt in module 6.",
+            "Module identifiers here are the ones already in production in the tactical-shop scenarios. The Telegram TRIGGER is deliberately a plain gateway webhook rather than a Telegram app trigger — it needs no polling and no extra connection.",
+            "sequential: true matters. Two expenses sent a second apart must not race each other into the same sheet row."
+        ]
+    }
+}

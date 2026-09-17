@@ -1,0 +1,119 @@
+# Setup — from nothing to a working bot
+
+Eight steps. Everything that needs a password or a tap is yours; everything else
+is in this repo. Budget about an hour.
+
+---
+
+## 1. Create the bot
+
+In Telegram, open **@BotFather** → `/newbot` → give it a name
+(`Mukhrani 2026 expenses`) and a username ending in `bot`.
+
+BotFather replies with a token like `8123456789:AAH...`. **That token is a
+password** — it lets anyone who has it read and send everything the bot does.
+Keep it out of this repo, out of chat, and out of screenshots.
+
+Then `/setprivacy` → **Disable**, so the bot can read messages in a group if you
+ever add one.
+
+## 2. Find your chat id
+
+Send the bot any message, then open in a browser:
+
+```
+https://api.telegram.org/bot<TOKEN>/getUpdates
+```
+
+Read `message.chat.id` — a number like `123456789`. That is the only chat that
+will ever be allowed to write to the ledger.
+
+## 3. Create the ledger
+
+Upload `sheets/expenses-ledger-template.csv` to Google Drive and open it as a
+Google Sheet. Name it **`მუხრანი 2026 — ხარჯები`**, and rename the tab to
+**`expenses`** (the blueprint looks for that exact tab name).
+
+It already contains the 15 payments from the bank statement, 1 July – 8 September
+2026, totalling **90,541.21 GEL**. Do not reorder the columns — the bot writes by
+position, not by header.
+
+Copy the spreadsheet id out of the URL:
+`https://docs.google.com/spreadsheets/d/`**`THIS_PART`**`/edit`.
+
+## 4. Import the scenario
+
+In Make: **Scenarios → Create new → ⋯ → Import Blueprint** →
+`blueprints/01-telegram-expenses.blueprint.json`.
+
+Then connect the three apps it uses:
+
+| Module | Connection |
+|---|---|
+| Claude: parse the expense | Anthropic — your API key |
+| Read ledger / Append to ledger | Google Sheets — the account that owns the sheet |
+| Reply modules | Telegram Bot — the token from step 1 |
+
+## 5. Replace the three placeholders
+
+| Placeholder | Where | Value |
+|---|---|---|
+| `<<OWNER_CHAT_ID>>` | module 2, the filter | your chat id from step 2 |
+| `<<LEDGER_SPREADSHEET_ID>>` | modules 4 and 8 | the id from step 3 |
+| `<<PASTE prompts/…>>` | module 6, System field | `prompts/00-conventions.md` then `prompts/01-expense-agent.md`, one after the other |
+
+## 6. Point Telegram at Make
+
+Open module 1, copy the webhook URL, then visit once in a browser:
+
+```
+https://api.telegram.org/bot<TOKEN>/setWebhook?url=<MAKE_WEBHOOK_URL>
+```
+
+You should see `{"ok":true,"result":true,"description":"Webhook was set"}`.
+
+Turn the scenario **ON**.
+
+## 7. Test it — in this order
+
+| Send | Expect |
+|---|---|
+| `/balance` | Budget 625,000 ₾ · spent 90,541.21 ₾ · left 534,458.79 ₾ |
+| `ბეტონი 250 ლარი` | ✅ logged, materials, CAPEX — check the row landed in the sheet |
+| `ჯიესენს გადავუხადე 20000 დოლარი` | ❓ a question about the exchange rate, and **no** new row |
+| `ჯიესენ გრუპს ავანსი 35000 ლარი` | ⚠️ confirm buttons, and **no** row until you tap |
+| From a different Telegram account | nothing at all — no reply, no row |
+
+The last one is the important one. If a second account gets a reply, the gate in
+module 2 is wrong and you must fix it before using the bot for real.
+
+Delete the `ბეტონი 250 ლარი` test row from the sheet afterwards.
+
+## 8. Wire the confirm buttons (optional, later)
+
+Out of the box, a confirmation shows buttons but the tap does nothing — you
+re-send the expense with the word `დიახ` and it goes through. To make the buttons
+live, add a route at the top router filtered on
+`{{1.callback_query.data}} = "confirm"` that re-runs the append using the values
+carried in `callback_query.message.text`. It is genuinely optional; the manual
+path is safe, just slower.
+
+---
+
+## Running cost
+
+| | Per month |
+|---|---|
+| Make.com | free tier covers this — roughly 6 operations per expense, so ~600 operations for 100 expenses |
+| Anthropic API | about USD 0.01 per expense parsed; USD 1–2 a month at any realistic volume |
+| Google Sheets, Telegram | free |
+
+## If something breaks
+
+| Symptom | Cause |
+|---|---|
+| Bot silent to everyone | Scenario is off, or `setWebhook` did not take — re-check step 6 |
+| Bot silent to you only | `<<OWNER_CHAT_ID>>` does not match your chat id |
+| "Parse JSON" errors in the run log | The model broke the output contract; open the run, read the raw text, and tighten the prompt |
+| Rows land in the wrong columns | The sheet tab was edited — column order must match the CSV template |
+| Telegram repeats an update | The scenario did not return 200; check module 12 is still last |

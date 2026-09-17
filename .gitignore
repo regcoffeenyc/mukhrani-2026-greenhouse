@@ -1,0 +1,11 @@
+# Never commit secrets — see README, Security
+.env
+*.token
+*credentials*.json
+*service-account*.json
+
+# Build noise
+__pycache__/
+*.pyc
+~$*.xlsx
+.DS_Store
