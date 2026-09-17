@@ -61,12 +61,24 @@ repo so the scenario can be rebuilt or reviewed without opening Make.
 
 ## 5. What is left to do
 
-**a. Create the Telegram connection.** Make → **Connections** → **+ Add** →
-**Telegram Bot** → paste the BotFather token → name it
-`Mukhrani 2026 expenses bot` → Save.
+**a. Create the Telegram connection.** The quickest route is from inside the
+scenario: open it, click the Telegram bubble *Reply: logged*, and next to
+**Connection** choose **Create a connection**. Two fields:
 
-Then open the scenario and pick that connection in the three reply modules
-(*Reply: where we are*, *Reply: logged*, *Reply: ask*, *Reply: confirm first*).
+| Field | Value |
+|---|---|
+| Connection name | `Mukhrani 2026 expenses bot` |
+| **Token** | the BotFather token |
+
+Make validates it on Save. Some versions of the dialog label the field
+**API Key** — it is the same BotFather token; Telegram has no separate API key,
+and the token is never typed into Telegram itself.
+
+Then pick that same connection from the dropdown in the other **three** Telegram
+modules: *Reply: where we are*, *Reply: ask*, *Reply: confirm first*. Four
+modules in total.
+
+(The other route: Make → **Connections** → **+ Add** → **Telegram Bot**.)
 
 **b. Fill in the owner gate.** Open module 2 (*Gate + normalise text*), open its
 filter, and replace `<<OWNER_CHAT_ID>>` with your numeric chat id from step 2.
