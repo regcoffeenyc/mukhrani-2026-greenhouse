@@ -50,18 +50,28 @@ already attached and the ledger id and system prompt already filled in:
 
 | | |
 |---|---|
-| Scenario | **Mukhrani 2026 — Greenhouse expenses (Telegram)**, id `7471723` |
-| Webhook URL | `https://hook.eu1.make.com/jok35l9zggg7dqpqt6bzl6ms8i7pie9u` |
+| Scenario | **Mukhrani 2026 — Greenhouse expenses (Telegram)**, id `7471723` — **active** |
+| Webhook | hook `3740894` · `https://hook.eu1.make.com/jok35l9zggg7dqpqt6bzl6ms8i7pie9u` |
 | Anthropic | `GTM Anthropic (agent brain)` — attached |
 | Google Sheets | `My Google connection` — attached |
-| Telegram | **not attached — this is yours to do** |
+| Telegram | `goderdzi's Telegram Bot connection` — attached to all four reply modules |
+
+**The webhook must not require an API key.** Telegram sends plain POSTs and
+cannot add a custom header, so a hook with API key authentication turned on
+rejects every update and the bot goes silent. Make's editor creates
+authenticated hooks by default when you add a new one, and Make will not let you
+remove the authentication afterwards ("The Header name cannot be changed once
+set") — you have to create a fresh unauthenticated hook and point the scenario
+at it. Hook `3740894` above is unauthenticated; leave it alone.
 
 `blueprints/01-telegram-expenses.blueprint.json` is the same flow, kept in the
 repo so the scenario can be rebuilt or reviewed without opening Make.
 
 ## 5. What is left to do
 
-**a. Create the Telegram connection.** The quickest route is from inside the
+**a. ~~Create the Telegram connection~~ — done.**
+
+Original text kept for reference: The quickest route is from inside the
 scenario: open it, click the Telegram bubble *Reply: logged*, and next to
 **Connection** choose **Create a connection**. Two fields:
 
@@ -80,11 +90,13 @@ modules in total.
 
 (The other route: Make → **Connections** → **+ Add** → **Telegram Bot**.)
 
-**b. Fill in the owner gate.** Open module 2 (*Gate + normalise text*), open its
-filter, and replace `<<OWNER_CHAT_ID>>` with your numeric chat id from step 2.
+**b. Fill in the owner gate — STILL OPEN.** Open module 2 (*Gate + normalise
+text*), open its filter, and replace `<<OWNER_CHAT_ID>>` with your numeric chat
+id from step 2.
 
-Until you do, the filter matches nothing and the bot answers nobody — the safe
-failure, and the reason the scenario ships switched off.
+The scenario is switched on, but until this field carries a real number the
+filter matches nothing and the bot answers nobody, including you. That is the
+safe failure, not a broken one.
 
 **c. Rename the sheet tab** to `expenses`, if you have not already (step 3).
 
@@ -98,7 +110,12 @@ https://api.telegram.org/bot<TOKEN>/setWebhook?url=https://hook.eu1.make.com/jok
 
 You should see `{"ok":true,"result":true,"description":"Webhook was set"}`.
 
-Turn the scenario **ON**.
+The scenario is already **ON**.
+
+**A note on the plan's active-scenario cap.** Make allows two active scenarios on
+this plan, and both slots were taken (*GTM — Order intake* and *GTM — Facebook
+post*). *GTM — Facebook post* was paused on 17 September 2026 to make room for
+this one. If you want it back, either pause the expense bot or raise the plan.
 
 ## 7. Test it — in this order
 
@@ -142,4 +159,6 @@ path is safe, just slower.
 | Bot silent to you only | `<<OWNER_CHAT_ID>>` does not match your chat id |
 | "Parse JSON" errors in the run log | The model broke the output contract; open the run, read the raw text, and tighten the prompt |
 | Rows land in the wrong columns | The sheet tab was edited — column order must match the CSV template |
-| Telegram repeats an update | The scenario did not return 200; check module 12 is still last |
+| Telegram repeats an update | Make did not return 200 — check the scenario is active and not erroring |
+| Bot silent, Make shows no runs at all | The webhook has API key authentication on, or `setWebhook` points at a different hook |
+| Cannot switch the scenario on | The plan's two active-scenario slots are full — pause another scenario |
