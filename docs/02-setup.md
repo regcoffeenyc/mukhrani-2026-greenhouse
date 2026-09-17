@@ -37,9 +37,11 @@ statement, 1 July – 8 September 2026, totalling **90,541.21 GEL**:
 `1NULNFpgxhzAqM7IWPr8-gxtRbqQ4MxMXgyNwrDzktLE`
 https://docs.google.com/spreadsheets/d/1NULNFpgxhzAqM7IWPr8-gxtRbqQ4MxMXgyNwrDzktLE/edit
 
-**One thing to do by hand:** open it and rename the first tab to exactly
-`expenses` (Google names it after the file on import). The blueprint looks the
-tab up by that name and will not find it otherwise.
+**The tab is called `Untitled`.** That is Google's doing — a CSV import names the
+file after the CSV and leaves the tab itself unnamed. The scenario reads the
+tab, not the file, so `Untitled` is what modules 4 and 8 carry. Renaming the tab
+is fine, but you have to change both modules to match on the same day, or the
+bot answers `Unable to parse range` and nothing else.
 
 Do not reorder the columns — the bot writes by position, not by header.
 
@@ -90,15 +92,19 @@ modules in total.
 
 (The other route: Make → **Connections** → **+ Add** → **Telegram Bot**.)
 
-**b. Fill in the owner gate — STILL OPEN.** Open module 2 (*Gate + normalise
-text*), open its filter, and replace `<<OWNER_CHAT_ID>>` with your numeric chat
-id from step 2.
+**b. ~~Fill in the owner gate~~ — done.** Module 2 carries `8831217917`, the
+Telegram id of @geotacticalmarket. Every other chat stops there.
 
-The scenario is switched on, but until this field carries a real number the
-filter matches nothing and the bot answers nobody, including you. That is the
-safe failure, not a broken one.
+**c. Fix the Anthropic connection — STILL OPEN.** Connection
+`GTM Anthropic (agent brain)` (id `10254078`) holds an API key that Anthropic
+now rejects with `401 API key is invalid`. Make cannot fetch the model list for
+module 6, so it marks the module unconfigured, the scenario carries
+`isinvalid: true`, and **it silently refuses to switch on** — the API reports
+"activated" and the scenario stays off.
 
-**c. Rename the sheet tab** to `expenses`, if you have not already (step 3).
+Make → **Connections** → `GTM Anthropic (agent brain)` → **Edit** → paste a
+valid key from console.anthropic.com. Eight other scenarios share this
+connection, so they are broken too until it is fixed.
 
 ## 6. Point Telegram at Make
 
@@ -161,4 +167,20 @@ path is safe, just slower.
 | Rows land in the wrong columns | The sheet tab was edited — column order must match the CSV template |
 | Telegram repeats an update | Make did not return 200 — check the scenario is active and not erroring |
 | Bot silent, Make shows no runs at all | The webhook has API key authentication on, or `setWebhook` points at a different hook |
-| Cannot switch the scenario on | The plan's two active-scenario slots are full — pause another scenario |
+| Cannot switch the scenario on | Either the plan's two active-scenario slots are full, or the scenario is flagged `isinvalid` — see below |
+| `Unable to parse range: '<name>'!P2:...` | `sheetId` in module 4 or 8 does not match the tab name character for character |
+
+**The invalid-scenario trap.** Make marks a scenario `isinvalid` when any module
+fails configuration validation, and then activation quietly does nothing — the
+API even replies "Scenario has been activated". Nothing in the editor says
+which module is at fault. Four causes hit this scenario on 17 September 2026:
+
+| What | Fix |
+|---|---|
+| Anthropic API key rejected (401) | re-enter the key on the connection |
+| filter operator written as `ne` | use a full operator: `text:notequal` |
+| a `mode` field on `google-sheets:filterRows` | remove it — that module has no such field |
+| a `messages[]` entry with no `inputType` | add `"inputType": "single"` for a plain string |
+
+To find the cause without guessing, validate each module against the Make API
+rather than reading the blueprint.
