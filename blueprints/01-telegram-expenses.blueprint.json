@@ -92,9 +92,8 @@
                 "filter": [
                   [
                     {
-                      "a": "P",
-                      "b": "void",
-                      "o": "text:notequal"
+                      "a": "A",
+                      "o": "exist"
                     }
                   ]
                 ],
@@ -109,7 +108,7 @@
                   "y": -150,
                   "name": "Read ledger"
                 },
-                "notes": "Reads every live row (column P 'void' marks a cancelled one). sheetId is the TAB name, not the file name - Google calls the first tab 'Untitled' after a CSV import, so check it with the Sheet Name dropdown rather than assuming. The filter operator must be a full Make operator ('text:notequal'); a bare 'ne' makes the module invalid and the scenario cannot be switched on. 500 rows is far above anything this project will produce."
+                "notes": "Filter on column A (date), which every row has. Do NOT filter on column P: Google returns an EMPTY range for an all-blank column, so 'P text:notequal void' matched nothing and /balance reported 0 records against 15 real ones - a silent wrong answer, not an error. Column P only becomes safe to filter on once every row carries 'live' or 'void'. sheetId is the TAB name, not the file name; check it with the Sheet Name dropdown rather than assuming. The filter operator must be a full Make operator such as 'text:notequal'; a bare 'ne' makes the module invalid."
               }
             },
             {
@@ -239,7 +238,7 @@
                   "12": "{{1.message.from.username}}",
                   "13": "{{formatDate(now; \"YYYY-MM-DD HH:mm\"; \"Asia/Tbilisi\")}}",
                   "14": "{{7.parameters.confidence}}",
-                  "15": "",
+                  "15": "live",
                   "16": "{{7.log_message}}"
                 },
                 "from": "drive"
@@ -250,7 +249,7 @@
                   "y": 150,
                   "name": "Append to ledger"
                 },
-                "notes": "Column order must match sheets/expenses-ledger-template.csv exactly. Column P (index 15) is the void flag — always written empty; only /undo fills it."
+                "notes": "Column order must match sheets/expenses-ledger-template.csv exactly. Column P (index 15) is the status flag and is written 'live', never blank - a blank column P is invisible to Google's range read, which is what broke /balance. /undo overwrites it with 'void'."
               }
             },
             {
@@ -378,6 +377,7 @@
       "Replace four placeholders before the first run: <<OWNER_CHAT_ID>>, <<LEDGER_SPREADSHEET_ID>>, <<LEDGER_TAB_NAME>> (modules 4 and 8), and the system prompt in module 6.",
       "Module identifiers verified against the Make API on 17 Sep 2026: anthropic-claude:createAMessage (NOT createMessage), google-sheets:addRow/filterRows v2, telegram:SendReplyMessage v1.",
       "Module configuration verified with validate_module_configuration on 17 Sep 2026. Three things Make rejects silently: a bare 'ne' filter operator, a 'mode' field on filterRows, and a messages[] entry without inputType. Any of them leaves the scenario isinvalid and un-activatable, with no error shown until you try to switch it on.",
+      "Google Sheets returns an empty range for a column that is blank in every row. Filtering on such a column yields zero rows with no error at all, so /balance answers 0 instead of failing. Filter on a column that is always populated.",
       "The gateway webhook MUST NOT have API key authentication. Telegram sends plain POSTs with no custom headers, so an authenticated hook rejects every update. Make cannot remove the authentication once set - create a fresh unauthenticated hook instead.",
       "An invalid Anthropic API key on the connection also makes the scenario isinvalid: Make cannot resolve the model list and marks module 6 unconfigured. Fix the connection before trying to activate.",
       "No WebhookRespond module: it is unsupported alongside sequential processing, and Make returns 200 by itself. sequential stays on so two quick messages cannot race into the same sheet row."

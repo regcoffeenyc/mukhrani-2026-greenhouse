@@ -169,6 +169,14 @@ path is safe, just slower.
 | Bot silent, Make shows no runs at all | The webhook has API key authentication on, or `setWebhook` points at a different hook |
 | Cannot switch the scenario on | Either the plan's two active-scenario slots are full, or the scenario is flagged `isinvalid` — see below |
 | `Unable to parse range: '<name>'!P2:...` | `sheetId` in module 4 or 8 does not match the tab name character for character |
+| `/balance` answers 0 records when the sheet has rows | The read filter points at a column that is blank in every row — see below |
+
+**The blank-column trap.** Google Sheets returns an *empty range* for a column
+that is blank in every row, so a filter on that column matches nothing and the
+module succeeds with zero rows. No error, no warning — `/balance` just answers
+`0.00 ₾ · 0 records` and looks like an empty ledger. The read filter therefore
+uses column A (date), which every row has. Column P is written `live` on every
+new row so it will be safe to filter on later.
 
 **The invalid-scenario trap.** Make marks a scenario `isinvalid` when any module
 fails configuration validation, and then activation quietly does nothing — the
