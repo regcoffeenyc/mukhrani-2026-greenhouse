@@ -28,18 +28,20 @@ https://api.telegram.org/bot<TOKEN>/getUpdates
 Read `message.chat.id` — a number like `123456789`. That is the only chat that
 will ever be allowed to write to the ledger.
 
-## 3. Create the ledger
+## 3. The ledger — already created
 
-Upload `sheets/expenses-ledger-template.csv` to Google Drive and open it as a
-Google Sheet. Name it **`მუხრანი 2026 — ხარჯები`**, and rename the tab to
-**`expenses`** (the blueprint looks for that exact tab name).
+The Google Sheet exists and is seeded with the 15 payments from the bank
+statement, 1 July – 8 September 2026, totalling **90,541.21 GEL**:
 
-It already contains the 15 payments from the bank statement, 1 July – 8 September
-2026, totalling **90,541.21 GEL**. Do not reorder the columns — the bot writes by
-position, not by header.
+**`მუხრანი 2026 — ხარჯები / expenses`**
+`1NULNFpgxhzAqM7IWPr8-gxtRbqQ4MxMXgyNwrDzktLE`
+https://docs.google.com/spreadsheets/d/1NULNFpgxhzAqM7IWPr8-gxtRbqQ4MxMXgyNwrDzktLE/edit
 
-Copy the spreadsheet id out of the URL:
-`https://docs.google.com/spreadsheets/d/`**`THIS_PART`**`/edit`.
+**One thing to do by hand:** open it and rename the first tab to exactly
+`expenses` (Google names it after the file on import). The blueprint looks the
+tab up by that name and will not find it otherwise.
+
+Do not reorder the columns — the bot writes by position, not by header.
 
 ## 4. Import the scenario
 
@@ -59,7 +61,7 @@ Then connect the three apps it uses:
 | Placeholder | Where | Value |
 |---|---|---|
 | `<<OWNER_CHAT_ID>>` | module 2, the filter | your chat id from step 2 |
-| `<<LEDGER_SPREADSHEET_ID>>` | modules 4 and 8 | the id from step 3 |
+| `<<LEDGER_SPREADSHEET_ID>>` | modules 4 and 8 | `1NULNFpgxhzAqM7IWPr8-gxtRbqQ4MxMXgyNwrDzktLE` |
 | `<<PASTE prompts/…>>` | module 6, System field | `prompts/00-conventions.md` then `prompts/01-expense-agent.md`, one after the other |
 
 ## 6. Point Telegram at Make
