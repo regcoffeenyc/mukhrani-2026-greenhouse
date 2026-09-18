@@ -14,3 +14,16 @@ date,description,counterparty,category,treatment,amount_gel,currency,amount_orig
 2026-08-26,ხელფასი,ნატალია ქანანელი,salaries,OPEX,2000,GEL,2000,1,bank,,bank_statement,import,2026-09-09 00:00,1,live,
 2026-08-31,ხელფასი,გოდერძი მეტრეველი,salaries,OPEX,3000,GEL,3000,1,bank,,bank_statement,import,2026-09-09 00:00,1,live,
 2026-09-08,საპენსიო გადასახადი,სსიპ საქართველოს საპენსიო ფონდი,taxes,OPEX,400,GEL,400,1,bank,,bank_statement,import,2026-09-09 00:00,1,live,
+2026-09-14,ავანსი თანახმად ხელშეკრულება,შპს ჯიესენ გრუპი,construction_advance,CAPEX,1500,GEL,1500,1,bank,N1,bank_statement,import,2026-09-18 00:00,1,live,"ხელშ. N1, ლარში გადახდილი"
+2026-09-14,ავანსი თანახმად ხელშეკრულება,შპს ჯიესენ გრუპი,construction_advance,CAPEX,1400,GEL,1400,1,bank,N1,bank_statement,import,2026-09-18 00:00,1,live,"ხელშ. N1, ლარში გადახდილი"
+2026-09-14,ხელფასი,გოდერძი მეტრეველი,salaries,OPEX,2000,GEL,2000,1,bank,,bank_statement,import,2026-09-18 00:00,1,live,
+2026-09-14,ინვოისი 12866 14/09/2026,შპს კლუგერი 1,supplier_invoice,CAPEX,1616,GEL,1616,1,bank,,bank_statement,import,2026-09-18 00:00,1,live,
+2026-09-14,მომსახურება,ვაჟა ბოდაველი,services,OPEX,150,GEL,150,1,bank,,bank_statement,import,2026-09-18 00:00,1,live,
+2026-09-14,სესხის ერთჯერადი მომსახურების საკომისიო GA/1-876787-001,სს ბანკი ქართუ,other,CAPEX,60,GEL,60,1,bank,,bank_statement,import,2026-09-18 00:00,1,live,სესხის ხარჯი
+2026-09-16,ინვოისი 20260916A 16/09/2026,შპს იბოსთარ,supplier_invoice,CAPEX,3030,GEL,3030,1,bank,,bank_statement,import,2026-09-18 00:00,1,live,
+2026-09-16,სასაქონლო ზედნადებებით პროდუქციის საფასური,ი.მ. ლალი ზეიკიძე,materials,CAPEX,467.7,GEL,467.7,1,bank,,bank_statement,import,2026-09-18 00:00,1,live,
+2026-09-16,ცემენტის ღირებულება,სოსო ხლუსიძე,materials,CAPEX,170,GEL,170,1,bank,,bank_statement,import,2026-09-18 00:00,1,live,
+2026-09-18,"ცემენტის ღირებულება, ზედნადები 1008422939",სოსო ხლუსიძე,materials,CAPEX,425,GEL,425,1,bank,,bank_statement,import,2026-09-18 00:00,1,live,
+2026-09-18,მომსახურება,რაუფ ბაირამოვი,services,OPEX,820,GEL,820,1,bank,,bank_statement,import,2026-09-18 00:00,1,live,
+2026-09-18,ამწე მომსახურება — სამონტაჟო სამუშაო,აკაკი ბუჩაშვილი,other,CAPEX,550,GEL,550,1,bank,,bank_statement,import,2026-09-18 00:00,1,live,კაპიტალიზებული
+2026-09-18,"საბანკო საკომისიოები — 11 გადარიცხვა, 11–18/09/2026",სს ბანკი ქართუ,other,CAPEX,12.08,GEL,12.08,1,bank,,bank_statement,import,2026-09-18 00:00,1,live,აგრეგირებული

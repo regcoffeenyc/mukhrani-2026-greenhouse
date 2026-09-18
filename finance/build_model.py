@@ -2,12 +2,14 @@
 # -*- coding: utf-8 -*-
 """Builds the greenhouse cash-flow model (2,000 m2, two harvest cycles, USD 140k bank loan)."""
 
+from pathlib import Path
+
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 from openpyxl.comments import Comment
 
-OUT = "/home/user/regcoffeenyc-tactical-shop-agents/greenhouse/Greenhouse_CashFlow_2000m2.xlsx"
+OUT = str(Path(__file__).with_name("Greenhouse_CashFlow_2000m2.xlsx"))
 
 F = "Arial"
 TITLE = Font(name=F, size=14, bold=True, color="1F4E79")
@@ -819,20 +821,23 @@ put(ac, "A2", "ეს ფურცელი ამონაწერის ა�
               "A verbatim copy of the statement — do not edit. The model uses it only for the FX rate.", NOTE)
 
 meta = [
-    ("წყარო / Source file", "transaction_history_all_accounts_20260401_20260909.csv (Google Drive)"),
+    ("წყარო / Source files", "transaction_history_all_accounts_20260401_20260909.csv · "
+                             "transaction_history_all_accounts_20260911_20260918.xlsx (Google Drive)"),
     ("ანგარიში / Account", "GE66CR0000009572073602"),
     ("მფლობელი / Account name", "შპს მუხრანი 2026 / LLC Mukhrani 2026"),
-    ("მოთხოვნილი პერიოდი / Period requested", "01/04/2026 – 09/09/2026"),
-    ("ფაქტობრივი ჩანაწერები / Entries present", "01/07/2026 – 08/09/2026 · 15 გადარიცხვა, შემოსავალი არ ფიქსირდება / 15 payments, no inflows"),
+    ("მოთხოვნილი პერიოდი / Period requested", "01/04/2026 – 18/09/2026"),
+    ("ფაქტობრივი ჩანაწერები / Entries present", "01/07/2026 – 18/09/2026 · 28 გადარიცხვა / 28 payments"),
+    ("ჩარიცხვა / Inflow", "14/09/2026 — 30,000 ₾, კრედიტის ტრანში GA/1-876787-001 — ხარჯი არ არის, ქვემოთ არ ითვლება / "
+                          "a tranche of the credit, not an expense, excluded below"),
 ]
 for i, (k, v) in enumerate(meta):
     put(ac, f"A{4+i}", k, BOLD, border=BOX)
     put(ac, f"B{4+i}", v, TXT, border=BOX)
 
-section(ac, 10, "გადარიცხვები / PAYMENTS", "E")
+section(ac, 11, "გადარიცხვები / PAYMENTS", "E")
 for col, h in zip("ABCDE", ["თარიღი / Date", "დანიშნულება / Description", "მიმღები / Counterparty",
                             "კატეგორია / Category", "თანხა GEL / Amount"]):
-    put(ac, f"{col}11", h, H1, fill=FILL_H, align="center")
+    put(ac, f"{col}12", h, H1, fill=FILL_H, align="center")
 
 CAT_BUILD = "მშენებლობის ავანსი / Construction advance"
 CAT_PAY = "ხელფასი / Salaries"
@@ -860,8 +865,22 @@ txns = [
     (date(2026, 8, 26), "ხელფასი", "ნატალია ქანანელი", CAT_PAY, -2000.00),
     (date(2026, 8, 31), "ხელფასი", "გოდერძი მეტრეველი", CAT_PAY, -3000.00),
     (date(2026, 9, 8), "საპენსიო გადასახადი", "სსიპ საქართველოს საპენსიო ფონდი", CAT_TAX, -400.00),
+    # --- ამონაწერი 11–18/09/2026 / statement of 11–18 September 2026 ---
+    (date(2026, 9, 14), "ავანსი თანახმად ხელშეკრულება (ხელშ. N1)", "შპს ჯიესენ გრუპ", CAT_BUILD, -1500.00),
+    (date(2026, 9, 14), "ავანსი თანახმად ხელშეკრულება (ხელშ. N1)", "შპს ჯიესენ გრუპ", CAT_BUILD, -1400.00),
+    (date(2026, 9, 14), "ხელფასი", "გოდერძი მეტრეველი", CAT_PAY, -2000.00),
+    (date(2026, 9, 14), "ინვოისი 12866 14/09/2026", "შპს კლუგერი 1", CAT_INV, -1616.00),
+    (date(2026, 9, 14), "მომსახურება", "ვაჟა ბოდაველი", CAT_SVC, -150.00),
+    (date(2026, 9, 14), "სესხის ერთჯერადი მომსახურების საკომისიო GA/1-876787-001", "სს ბანკი ქართუ", CAT_OTH, -60.00),
+    (date(2026, 9, 16), "ინვოისი 20260916A 16/09/2026", "შპს იბოსთარ", CAT_INV, -3030.00),
+    (date(2026, 9, 16), "სასაქონლო ზედნადებებით პროდუქციის საფასური", "ი.მ. ლალი ზეიკიძე", CAT_MAT, -467.70),
+    (date(2026, 9, 16), "ცემენტის ღირებულება", "სოსო ხლუსიძე", CAT_MAT, -170.00),
+    (date(2026, 9, 18), "ცემენტის ღირებულება, ზედნადები 1008422939 18/09/2026", "სოსო ხლუსიძე", CAT_MAT, -425.00),
+    (date(2026, 9, 18), "მომსახურება", "რაუფ ბაირამოვი", CAT_SVC, -820.00),
+    (date(2026, 9, 18), "ამწე მომსახურება — სამონტაჟო სამუშაო, კაპიტალიზებული", "აკაკი ბუჩაშვილი", CAT_OTH, -550.00),
+    (date(2026, 9, 18), "საბანკო საკომისიოები — 11 გადარიცხვა, 11–18/09/2026", "სს ბანკი ქართუ", CAT_OTH, -12.08),
 ]
-TR0 = 12
+TR0 = 13
 for i, (d, desc, cp, cat, amt) in enumerate(txns):
     r = TR0 + i
     put(ac, f"A{r}", d, INP, fmt='DD/MM/YYYY', border=BOX, align="center")
@@ -900,7 +919,7 @@ put(ac, f"A{MS+1}", "თვე / Month", H1, fill=FILL_H)
 put(ac, f"B{MS+1}", "თანხა GEL / Amount", H1, fill=FILL_H, align="center")
 for i, (lab, y, m, last) in enumerate([("ივლისი 2026 / July", 2026, 7, 31),
                                        ("აგვისტო 2026 / August", 2026, 8, 31),
-                                       ("სექტემბერი 2026 (08-მდე) / September (to the 8th)", 2026, 9, 30)]):
+                                       ("სექტემბერი 2026 (18-მდე) / September (to the 18th)", 2026, 9, 30)]):
     r = MS + 2 + i
     put(ac, f"A{r}", lab, TXT, border=BOX)
     put(ac, f"B{r}",
@@ -975,14 +994,20 @@ for col, h in zip("ABCDEF", ["კატეგორია / Category", "და�
                              "კლასიფიკაცია / Treatment", "დაგეგმილი / Planned", "სხვაობა / Variance"]):
     put(bg, f"{col}13", h, H1, fill=FILL_H, align="center")
 
+# The source rows live on Actuals and move whenever a payment is added, so they
+# are computed from the same variables that laid that sheet out — never typed in.
+# CATS_A fixes the order: BUILD, PAY, TAX, SVC, MAT, INV, OTH.
+A_CAT_ROW = {cat: CS + 2 + i for i, cat in enumerate(CATS_A)}
+A_MONTH_ROW = [MS + 2 + i for i in range(3)]
+
 bcats = [
-    ("მშენებლობის ავანსი / Construction advance", 31, "CAPEX"),
-    ("ხელფასი / Salaries", 32, "OPEX"),
-    ("გადასახადები / Taxes & pension", 33, "OPEX"),
-    ("მომსახურება / Services", 34, "OPEX"),
-    ("მასალები / Materials", 35, "CAPEX"),
-    ("მომწოდებლის ინვოისი / Supplier invoice", 36, "CAPEX"),
-    ("სხვა / Other", 37, "CAPEX"),
+    ("მშენებლობის ავანსი / Construction advance", A_CAT_ROW[CAT_BUILD], "CAPEX"),
+    ("ხელფასი / Salaries", A_CAT_ROW[CAT_PAY], "OPEX"),
+    ("გადასახადები / Taxes & pension", A_CAT_ROW[CAT_TAX], "OPEX"),
+    ("მომსახურება / Services", A_CAT_ROW[CAT_SVC], "OPEX"),
+    ("მასალები / Materials", A_CAT_ROW[CAT_MAT], "CAPEX"),
+    ("მომწოდებლის ინვოისი / Supplier invoice", A_CAT_ROW[CAT_INV], "CAPEX"),
+    ("სხვა / Other", A_CAT_ROW[CAT_OTH], "CAPEX"),
 ]
 BR0 = 14
 for i, (lab, src, treat) in enumerate(bcats):
@@ -1008,8 +1033,9 @@ section(bg, 23, "3. ბიუჯეტის ნაშთი თვეები�
 for col, h in zip("ABCD", ["თვე / Month", "ხარჯი / Spend", "კუმულატიური / Cumulative",
                            "ბიუჯეტის ნაშთი / Budget left"]):
     put(bg, f"{col}24", h, H1, fill=FILL_H, align="center")
-for i, (lab, src) in enumerate([("ივლისი 2026 / July", 43), ("აგვისტო 2026 / August", 44),
-                                ("სექტემბერი 2026 (08-მდე) / September (to the 8th)", 45)]):
+for i, (lab, src) in enumerate([("ივლისი 2026 / July", A_MONTH_ROW[0]),
+                                ("აგვისტო 2026 / August", A_MONTH_ROW[1]),
+                                ("სექტემბერი 2026 (18-მდე) / September (to the 18th)", A_MONTH_ROW[2])]):
     r = 25 + i
     put(bg, f"A{r}", lab, TXT, border=BOX)
     put(bg, f"B{r}", f"=Actuals!B{src}", LNK, fmt=GEL2, border=BOX, align="right")
@@ -1032,10 +1058,13 @@ put(bg, "C32", "=Assumptions!$B$28", LNK, fmt='0.0000', border=BOX, align="right
 put(bg, "D32", "=B32*Assumptions!$B$28", BOLD, fmt=GEL, border=BOX, align="right")
 put(bg, "G32", "მფლობელის მონაცემი / given by the owner", NOTE)
 put(bg, "A33", "გადახდილი ავანსი / Advances paid", TXT, border=BOX)
-put(bg, "B33", "=22000+5000", TXT, fmt='#,##0', border=BOX, align="right")
+# The September advance was paid in lari against a contract priced in dollars.
+# It is converted at the contract's own reference rate, so the GEL outstanding
+# on row 34 falls by exactly the 2,900 GEL paid.
+put(bg, "B33", "=22000+5000+2900/Assumptions!$B$28", TXT, fmt='#,##0', border=BOX, align="right")
 put(bg, "C33", "=IFERROR(D33/B33,0)", TXT, fmt='0.0000', border=BOX, align="right")
-put(bg, "D33", "=Actuals!B31", LNK, fmt=GEL2, border=BOX, align="right")
-put(bg, "G33", "09/07/2026 — 22,000 $ · 04/08/2026 — 5,000 $", NOTE)
+put(bg, "D33", f"=Actuals!B{A_CAT_ROW[CAT_BUILD]}", LNK, fmt=GEL2, border=BOX, align="right")
+put(bg, "G33", "09/07/2026 — 22,000 $ · 04/08/2026 — 5,000 $ · 14/09/2026 — 2,900 ₾ ≈ 1,099 $ (ერ.კ. 2.6384)", NOTE)
 put(bg, "A34", "დარჩენილი გადასახდელი / Outstanding", BOLD, fill=FILL_TOT, border=BOX)
 put(bg, "B34", "=B32-B33", BOLD, fmt='#,##0', fill=FILL_TOT, border=BOX, align="right")
 put(bg, "C34", "=Assumptions!$B$28", LNK, fmt='0.0000', fill=FILL_TOT, border=BOX, align="right")

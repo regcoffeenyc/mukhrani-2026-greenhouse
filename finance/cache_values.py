@@ -4,9 +4,10 @@
 Sheets recalculate everything from the formulas themselves on open."""
 import re, zipfile, io
 import xml.etree.ElementTree as ET
+from pathlib import Path
 import formulas
 
-SRC = "/home/user/regcoffeenyc-tactical-shop-agents/greenhouse/Greenhouse_CashFlow_2000m2.xlsx"
+SRC = str(Path(__file__).with_name("Greenhouse_CashFlow_2000m2.xlsx"))
 NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
 RNS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 ET.register_namespace("", NS)
