@@ -102,8 +102,11 @@ Only once the new bot answers `/balance` correctly:
 
 1. Delete scenario `7471723` from the shop organisation.
 2. Delete hook `3740894`.
-3. Switch `GTM — Facebook post` (`7191121`) back on — it has been off since
-   17 September and the slot is now free.
+
+That frees the shop's second scenario slot. **Do not switch `GTM — Facebook post`
+(`7191121`) back on to fill it.** The owner was asked on 19 September and said to
+leave it off for now. It is a shop decision, made deliberately, not an oversight
+left behind by this migration — leave it alone until the owner says otherwise.
 
 ## After the move
 
