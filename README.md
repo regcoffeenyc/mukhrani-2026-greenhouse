@@ -80,3 +80,14 @@ the workbook.
 This repository is **private**: it carries the bank account, the loan terms and
 the counterparties. Never commit the Telegram bot token, the Anthropic API key,
 Make connection details, or anything that opens the bank.
+
+## სამი ცალკე საქმე / Three separate jobs
+
+gdsff.com, geotacticalmarket.com და ეს სათბურის პროექტი სამი სხვადასხვა საქმეა.
+არაფერი გადადის ერთიდან მეორეში — არც ფაილი, არც ფაქტი, არც ინფრასტრუქტურა, არც
+ანგარიში.
+
+gdsff.com, geotacticalmarket.com and this greenhouse project are three different
+jobs. Nothing crosses between them — not files, not facts, not infrastructure, not
+bills. The Make automation currently breaks that rule and is being moved out;
+`docs/03-separation.md` says what went wrong and how it gets fixed.
