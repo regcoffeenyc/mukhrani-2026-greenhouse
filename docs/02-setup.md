@@ -127,18 +127,65 @@ this one. If you want it back, either pause the expense bot or raise the plan.
 
 | Send | Expect |
 |---|---|
-| `/balance` | Budget 625,000 ₾ · spent 90,541.21 ₾ · left 534,458.79 ₾ |
+| `/help` | the command list |
+| `/balance` | Budget 625,000 ₾ · spent 217,241.99 ₾ · left 407,758.01 ₾ · 30 records |
+| `/blocks 180 0.8` | 1,757 blocks · 17 bags of cement · 2.5 m³ sand |
+| `/foundation 180 0.4 0.5` | 37.8 m³ concrete · 257 bags · 1,133 kg rebar |
 | `ბეტონი 250 ლარი` | ✅ logged, materials, CAPEX — check the row landed in the sheet |
 | `ჯიესენს გადავუხადე 20000 დოლარი` | ❓ a question about the exchange rate, and **no** new row |
 | `ჯიესენ გრუპს ავანსი 35000 ლარი` | ⚠️ confirm buttons, and **no** row until you tap |
 | From a different Telegram account | nothing at all — no reply, no row |
+
+The two calculator lines must match `construction/Block_Calculator.xlsx` and
+`construction/Foundation_Calculator.xlsx` to the digit. If they do not, one of
+the two has been changed without the other — see *The calculators* below.
 
 The last one is the important one. If a second account gets a reply, the gate in
 module 2 is wrong and you must fix it before using the bot for real.
 
 Delete the `ბეტონი 250 ლარი` test row from the sheet afterwards.
 
-## 8. Wire the confirm buttons (optional, later)
+## 8. The calculators
+
+The bot answers three commands with no model call at all:
+
+| Command | Arguments | Defaults | Answers |
+|---|---|---|---|
+| `/help`, `/start` | — | — | the command list |
+| `/blocks` | perimetre, wall height, in metres | `180 0.8` | blocks, cement bags, sand |
+| `/foundation` | length, width, depth, in metres | `180 0.40 0.50` | concrete, blinding, gravel, cement, sand, stone, rebar, excavation |
+
+Arguments are optional: `/blocks` on its own uses the greenhouse's own
+perimetre. Numbers use a full stop, not a comma — `0.8`, never `0,8`.
+
+**Why no model call.** The Anthropic balance has run dry three times, and each
+time it took the whole scenario down with it. Material take-offs are arithmetic;
+they do not need a model and must keep working when the credit does not. The
+sums live in the reply text of modules 13 and 15 as Make expressions.
+
+**The constants are copies.** Every figure in those expressions is lifted from
+the two spreadsheets in `construction/`:
+
+| | Block calculator | Foundation calculator |
+|---|---|---|
+| Per unit | 11.6144 blocks/m², 0.0141723 m³ mortar/m² | 0.45 m³ sand and 0.85 m³ stone per m³ |
+| Cement | 350 kg per m³ of mortar | 320 kg per m³ of concrete **plus** 200 kg per m³ of blinding |
+| Waste | 5% blocks, 15% mortar | 5% concrete, 5% steel |
+| Assumed | 40×20×20 block, 1 cm joints | 5 cm blinding, 10 cm gravel, 4×Ø12 + Ø8@300, 40 mm cover |
+
+Change one and you must change the other in the same commit, or the bot and the
+spreadsheet will quietly give the owner two different orders. That has already
+happened once: the bot left the blinding layer's cement out and answered 242
+bags where the sheet said 257.
+
+Two things the bot does not do that the spreadsheets do: deduct gate openings
+from the wall area, and let you change the block size or the mix. For anything
+other than a quick number on site, open the spreadsheet.
+
+The foundation figures are a take-off, not a design. The section and the
+reinforcement come from GSN Group's drawings; the reply says so every time.
+
+## 9. Wire the confirm buttons (optional, later)
 
 Out of the box, a confirmation shows buttons but the tap does nothing — you
 re-send the expense with the word `დიახ` and it goes through. To make the buttons
@@ -154,7 +201,7 @@ path is safe, just slower.
 | | Per month |
 |---|---|
 | Make.com | free tier covers this — roughly 6 operations per expense, so ~600 operations for 100 expenses |
-| Anthropic API | about USD 0.01 per expense parsed; USD 1–2 a month at any realistic volume |
+| Anthropic API | about USD 0.01 per expense parsed; USD 1–2 a month at any realistic volume. `/balance`, `/blocks` and `/foundation` cost nothing — they never call the model |
 | Google Sheets, Telegram | free |
 
 ## If something breaks
@@ -167,7 +214,8 @@ path is safe, just slower.
 | Rows land in the wrong columns | The sheet tab was edited — column order must match the CSV template |
 | Telegram repeats an update | Make did not return 200 — check the scenario is active and not erroring |
 | Bot silent, Make shows no runs at all | The webhook has API key authentication on, or `setWebhook` points at a different hook |
-| Cannot switch the scenario on | Either the plan's two active-scenario slots are full, or the scenario is flagged `isinvalid` — see below |
+| Cannot switch the scenario on | Either the plan's active-scenario slots are full, or the scenario is flagged `isinvalid` — see below |
+| Bot answers `/balance` and the calculators but not free text | The Anthropic balance is empty. The reply says so. Top up at console.anthropic.com → Plans & Billing; nothing else needs touching |
 | `Unable to parse range: '<name>'!P2:...` | `sheetId` in module 4 or 8 does not match the tab name character for character |
 | `/balance` answers 0 records when the sheet has rows | The read filter points at a column that is blank in every row — see below |
 
@@ -192,3 +240,16 @@ which module is at fault. Four causes hit this scenario on 17 September 2026:
 
 To find the cause without guessing, validate each module against the Make API
 rather than reading the blueprint.
+
+There is a fifth cause, and it is not a configuration mistake at all: **Make
+also flags a scenario `isinvalid` when a module keeps failing at run time.**
+An empty Anthropic balance did it on 17, 18 and 21 September — the model call
+returned `[400] Your credit balance is too low`, Make gave up on the scenario
+and switched it off, and `/balance` died along with it. Re-saving the blueprint
+does not clear it while the queued messages are still waiting to fail again.
+
+The fix is in the blueprint now: module 6 carries an error handler that tells
+the owner what happened and ends in `builtin:Ignore`, so a model failure costs
+one message instead of the whole bot. Keep it. If you ever rebuild the scenario
+by hand, rebuild that too — it is the difference between one unparsed expense
+and a silent bot nobody notices for a day.

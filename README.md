@@ -27,13 +27,15 @@ LLC Mukhrani 2026 (ID 404801602) · hydroponic greenhouse · 625,000 GEL budget
 │                     The Telegram agent's system prompt
 ├── blueprints/       Make.com სცენარი
 │                     The Make.com scenario
-├── sheets/           ხარჯების ლეჯერის შაბლონი, 15 ფაქტობრივი ჩანაწერით
-│                     The expense ledger template, seeded with the 15 real payments
+├── sheets/           ხარჯების ლეჯერის შაბლონი, ფაქტობრივი ჩანაწერებით
+│                     The expense ledger template, seeded with the real payments
+├── construction/     მასალის კალკულატორები — ბლოკი და საძირკველი
+│                     Material calculators — blockwork and foundation
 └── docs/             როგორ მუშაობს და როგორ აეწყოს
                       How it works and how to set it up
 ```
 
-## ორი ნაწილი / Two parts
+## სამი ნაწილი / Three parts
 
 **ფინანსური მოდელი** (`finance/`) — 2,000 m², წელიწადში ორი მოსავალი, ბანკი ქართუს
 625,000 ₾ კრედიტი სააგენტოს თანადაფინანსებით. ბიუჯეტი, სესხის გრაფიკი, თვიური
@@ -44,8 +46,31 @@ LLC Mukhrani 2026 (ID 404801602) · hydroponic greenhouse · 625,000 GEL budget
 შლის მონაცემებად, წერს Google Sheet-ში და პასუხობს იმით, თუ რამდენი დაგრჩათ.
 დაყენება — `docs/02-setup.md`.
 
+**მასალის კალკულატორები** (`construction/`) — ორი ცოცხალფორმულიანი Excel:
+პერიმეტრის ბლოკის კედელი და ზოლოვანი საძირკველი. იგივე ციფრებს ბოტიც აბრუნებს
+ბრძანებებით `/blocks` და `/foundation`.
+
+Two live-formula workbooks — a perimeter blockwork wall and a strip foundation.
+The bot returns the same numbers from `/blocks` and `/foundation`, so a quantity
+can be checked on site without opening a spreadsheet. The constants are shared
+between the two by hand: change one, change the other in the same commit.
+
 The model is the plan; the agent keeps the plan honest by recording what is
-actually spent, in the seven categories the model reads.
+actually spent, in the seven categories the model reads; the calculators say
+what to order before it is spent.
+
+## ბოტის ბრძანებები / Bot commands
+
+| | |
+|---|---|
+| `/balance` | ბიუჯეტი, დახარჯული, დარჩენილი / budget, spent, left |
+| `/blocks 180 0.8` | ბლოკი, ცემენტი, ქვიშა / blocks, cement, sand |
+| `/foundation 180 0.4 0.5` | ბეტონი, ცემენტი, ქვიშა, ღორღი, არმატურა / concrete, cement, sand, stone, rebar |
+| `/help` | ბრძანებების სია / the command list |
+| ჩვეულებრივი ტექსტი / plain text | ხარჯი იწერება ლეჯერში / the expense is parsed and logged |
+
+ციფრები არასავალდებულოა — უმათოდ პროექტის საკუთარი ზომები გამოიყენება.
+The numbers are optional; without them the project's own dimensions are used.
 
 ## დაწყება / Getting started
 

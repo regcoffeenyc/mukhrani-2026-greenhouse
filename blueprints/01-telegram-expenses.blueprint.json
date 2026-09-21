@@ -3,35 +3,32 @@
   "flow": [
     {
       "id": 1,
+      "mapper": {},
       "module": "gateway:CustomWebHook",
       "version": 1,
-      "parameters": {
-        "hook": null,
-        "maxResults": 1
-      },
-      "mapper": {},
       "metadata": {
+        "notes": "Create the hook, copy its URL, then point the bot at it once: https://api.telegram.org/bot<TOKEN>/setWebhook?url=<THIS_URL>. The hook must have NO API key authentication - Telegram sends plain POSTs and cannot add a header, so an authenticated hook rejects every update, and Make cannot remove the authentication afterwards. Telegram posts the whole update object here, so 1.message.text, 1.message.chat.id, 1.message.photo[] and 1.message.caption are all available downstream. See docs/02-setup.md.",
         "designer": {
           "x": 0,
           "y": 0,
           "name": "Telegram update"
-        },
-        "notes": "Create the hook, copy its URL, then point the bot at it once: https://api.telegram.org/bot<TOKEN>/setWebhook?url=<THIS_URL>. Telegram posts the whole update object here, so 1.message.text, 1.message.chat.id, 1.message.photo[] and 1.message.caption are all available downstream. See docs/02-setup.md."
+        }
+      },
+      "parameters": {
+        "hook": null,
+        "maxResults": 1
       }
     },
     {
       "id": 2,
-      "module": "util:SetVariable2",
-      "version": 1,
-      "parameters": {},
       "filter": {
         "name": "Owner only",
         "conditions": [
           [
             {
               "a": "{{1.message.chat.id}}",
-              "o": "text:equal",
-              "b": "<<OWNER_CHAT_ID>>"
+              "b": "<<OWNER_CHAT_ID>>",
+              "o": "text:equal"
             }
           ]
         ]
@@ -41,54 +38,41 @@
         "scope": "roundtrip",
         "value": "{{ifempty(1.message.text; 1.message.caption)}}"
       },
+      "module": "util:SetVariable2",
+      "version": 1,
       "metadata": {
+        "notes": "THE SECURITY GATE. Anything from another chat stops here and is never written. Replace <<OWNER_CHAT_ID>>: message the bot once, then open https://api.telegram.org/bot<TOKEN>/getUpdates and read message.chat.id. A photo carries its text in caption, not text - ifempty handles both.",
         "designer": {
           "x": 300,
           "y": 0,
           "name": "Gate + normalise text"
-        },
-        "notes": "THE SECURITY GATE. Anything from another chat stops here and is never written. Replace <<OWNER_CHAT_ID>>: message the bot once, then open https://api.telegram.org/bot<TOKEN>/getUpdates and read message.chat.id. A photo carries its text in caption, not text — ifempty handles both."
-      }
+        }
+      },
+      "parameters": {}
     },
     {
       "id": 3,
+      "mapper": null,
       "module": "builtin:BasicRouter",
-      "version": 1,
-      "parameters": {},
-      "mapper": {},
-      "metadata": {
-        "designer": {
-          "x": 600,
-          "y": 0,
-          "name": "Command or expense?"
-        }
-      },
       "routes": [
         {
           "flow": [
             {
               "id": 4,
-              "module": "google-sheets:filterRows",
-              "version": 2,
-              "parameters": {
-                "__IMTCONN__": null
-              },
               "filter": {
-                "name": "Commands only",
+                "name": "/balance only",
                 "conditions": [
                   [
                     {
                       "a": "{{2.msg}}",
-                      "o": "text:startwith",
-                      "b": "/"
+                      "b": "/balance",
+                      "o": "text:startwith"
                     }
                   ]
                 ]
               },
               "mapper": {
-                "spreadsheetId": "<<LEDGER_SPREADSHEET_ID>>",
-                "sheetId": "<<LEDGER_TAB_NAME>>",
-                "includesHeaders": true,
+                "limit": 500,
                 "filter": [
                   [
                     {
@@ -97,39 +81,45 @@
                     }
                   ]
                 ],
+                "sheetId": "<<LEDGER_TAB_NAME>>",
                 "sortOrder": "desc",
-                "limit": 500,
+                "spreadsheetId": "<<LEDGER_SPREADSHEET_ID>>",
+                "includesHeaders": true,
                 "from": "drive",
                 "tableFirstRow": "A1:CZ1"
               },
+              "module": "google-sheets:filterRows",
+              "version": 2,
               "metadata": {
+                "notes": "Filter on column A (date), which every row has. Do NOT filter on column P: Google returns an empty range for an all-blank column, so the filter matched nothing and /balance answered 0 records against a real ledger. sheetId is the TAB name - check it in the Sheet Name dropdown rather than assuming.",
                 "designer": {
                   "x": 900,
                   "y": -150,
                   "name": "Read ledger"
-                },
-                "notes": "Filter on column A (date), which every row has. Do NOT filter on column P: Google returns an EMPTY range for an all-blank column, so 'P text:notequal void' matched nothing and /balance reported 0 records against 15 real ones - a silent wrong answer, not an error. Column P only becomes safe to filter on once every row carries 'live' or 'void'. sheetId is the TAB name, not the file name; check it with the Sheet Name dropdown rather than assuming. The filter operator must be a full Make operator such as 'text:notequal'; a bare 'ne' makes the module invalid."
+                }
+              },
+              "parameters": {
+                "__IMTCONN__": null
               }
             },
             {
               "id": 5,
+              "mapper": {
+                "text": "<b>ბიუჯეტი / Budget</b>\n\nბიუჯეტი: <b>625,000 ₾</b>\nდახარჯული: <b>{{formatNumber(sum(map(4.array; \"F\")); 2; \".\"; \",\")}} ₾</b>\nდარჩენილი: <b>{{formatNumber(625000 - sum(map(4.array; \"F\")); 2; \".\"; \",\")}} ₾</b>\nჩანაწერი: {{length(4.array)}}",
+                "chatId": "{{1.message.chat.id}}",
+                "parseMode": "HTML"
+              },
               "module": "telegram:SendReplyMessage",
               "version": 1,
-              "parameters": {
-                "__IMTCONN__": null
-              },
-              "mapper": {
-                "chatId": "{{1.message.chat.id}}",
-                "parseMode": "HTML",
-                "text": "<b>ბიუჯეტი / Budget</b>\n\nბიუჯეტი: <b>625,000 ₾</b>\nდახარჯული: <b>{{formatNumber(sum(map(4.array; \"F\")); 2; \".\"; \",\")}} ₾</b>\nდარჩენილი: <b>{{formatNumber(625000 - sum(map(4.array; \"F\")); 2; \".\"; \",\")}} ₾</b>\nჩანაწერი: {{length(4.array)}}\n\nბოლო: {{get(4.array; \"1.A\")}} — {{get(4.array; \"1.B\")}} — {{get(4.array; \"1.F\")}} ₾"
-              },
               "metadata": {
                 "designer": {
                   "x": 1200,
                   "y": -150,
                   "name": "Reply: where we are"
-                },
-                "notes": "Column F is amount_gel. The 625000 budget is written here rather than read from a cell so the bot still answers if the sheet is unreachable; if the facility ever changes, change it here and in finance/build_model.py."
+                }
+              },
+              "parameters": {
+                "__IMTCONN__": null
               }
             }
           ]
@@ -138,27 +128,20 @@
           "flow": [
             {
               "id": 6,
-              "module": "anthropic-claude:createAMessage",
-              "version": 1,
-              "parameters": {
-                "__IMTCONN__": null
-              },
               "filter": {
                 "name": "Not a command",
                 "conditions": [
                   [
                     {
                       "a": "{{2.msg}}",
-                      "o": "text:notstartwith",
-                      "b": "/"
+                      "b": "/",
+                      "o": "text:notstartwith"
                     }
                   ]
                 ]
               },
               "mapper": {
                 "model": "claude-sonnet-4-6",
-                "max_tokens": 1024,
-                "temperature": 0,
                 "system": "<<PASTE prompts/00-conventions.md THEN prompts/01-expense-agent.md>>",
                 "messages": [
                   {
@@ -166,62 +149,93 @@
                     "content": "Today is {{formatDate(now; \"YYYY-MM-DD\"; \"Asia/Tbilisi\")}}.\n\nOwner message:\n{{2.msg}}",
                     "inputType": "single"
                   }
-                ]
+                ],
+                "max_tokens": 1024,
+                "temperature": 0
               },
+              "module": "anthropic-claude:createAMessage",
+              "version": 1,
               "metadata": {
                 "designer": {
                   "x": 900,
                   "y": 150,
                   "name": "Claude: parse the expense"
+                }
+              },
+              "parameters": {
+                "__IMTCONN__": null
+              },
+              "onerror": [
+                {
+                  "id": 60,
+                  "module": "telegram:SendReplyMessage",
+                  "version": 1,
+                  "parameters": {
+                    "__IMTCONN__": null
+                  },
+                  "mapper": {
+                    "text": "⚠️ ხარჯის ავტომატური ამოცნობა ამჟამად არ მუშაობს (Anthropic-ის ბალანსი).\nკალკულატორები და /balance მუშაობს.\n\n<i>Expense parsing is down (Anthropic credit). The calculators and /balance still work.</i>",
+                    "chatId": "{{1.message.chat.id}}",
+                    "parseMode": "HTML"
+                  },
+                  "metadata": {
+                    "designer": {
+                      "x": 900,
+                      "y": 330,
+                      "name": "Tell the owner, do not die"
+                    }
+                  }
                 },
-                "notes": "temperature 0 — this is extraction, not writing. Today's date is passed in because the model has no clock. To read receipt photos, add the image as a second content block of type image; see docs/01-architecture.md. messages[].inputType must be set: 'single' for a plain string, 'multiple' for content blocks. Without it Make flags the module invalid and the whole scenario refuses to activate."
-              }
+                {
+                  "id": 61,
+                  "module": "builtin:Ignore",
+                  "version": 1,
+                  "mapper": {},
+                  "parameters": {},
+                  "metadata": {
+                    "designer": {
+                      "x": 1200,
+                      "y": 330,
+                      "name": "Skip the bundle"
+                    }
+                  }
+                }
+              ]
             },
             {
               "id": 7,
-              "module": "json:ParseJSON",
-              "version": 1,
-              "parameters": {
-                "type": null
-              },
               "mapper": {
                 "json": "{{6.content[].text}}"
               },
+              "module": "json:ParseJSON",
+              "version": 1,
               "metadata": {
                 "designer": {
                   "x": 1200,
                   "y": 150,
                   "name": "Parse JSON"
-                },
-                "notes": "If this module errors the model broke the output contract. Attach an error handler that replies to the owner with the raw text rather than failing silently."
+                }
+              },
+              "parameters": {
+                "type": null
               }
             },
             {
               "id": 8,
-              "module": "google-sheets:addRow",
-              "version": 2,
-              "parameters": {
-                "__IMTCONN__": null
-              },
               "filter": {
                 "name": "Only a clean log_expense",
                 "conditions": [
                   [
                     {
                       "a": "{{7.action}}",
-                      "o": "text:equal",
-                      "b": "log_expense"
+                      "b": "log_expense",
+                      "o": "text:equal"
                     }
                   ]
                 ]
               },
               "mapper": {
                 "mode": "select",
-                "spreadsheetId": "<<LEDGER_SPREADSHEET_ID>>",
-                "sheetId": "<<LEDGER_TAB_NAME>>",
-                "includesHeaders": true,
-                "insertDataOption": "INSERT_ROWS",
-                "valueInputOption": "USER_ENTERED",
                 "values": {
                   "0": "{{7.parameters.date}}",
                   "1": "{{7.parameters.description}}",
@@ -241,145 +255,334 @@
                   "15": "live",
                   "16": "{{7.log_message}}"
                 },
+                "sheetId": "<<LEDGER_TAB_NAME>>",
+                "spreadsheetId": "<<LEDGER_SPREADSHEET_ID>>",
+                "includesHeaders": true,
+                "insertDataOption": "INSERT_ROWS",
+                "valueInputOption": "USER_ENTERED",
                 "from": "drive"
               },
+              "module": "google-sheets:addRow",
+              "version": 2,
               "metadata": {
                 "designer": {
                   "x": 1500,
                   "y": 150,
                   "name": "Append to ledger"
-                },
-                "notes": "Column order must match sheets/expenses-ledger-template.csv exactly. Column P (index 15) is the status flag and is written 'live', never blank - a blank column P is invisible to Google's range read, which is what broke /balance. /undo overwrites it with 'void'."
+                }
+              },
+              "parameters": {
+                "__IMTCONN__": null
               }
             },
             {
               "id": 9,
-              "module": "telegram:SendReplyMessage",
-              "version": 1,
-              "parameters": {
-                "__IMTCONN__": null
-              },
               "filter": {
                 "name": "Logged",
                 "conditions": [
                   [
                     {
                       "a": "{{7.action}}",
-                      "o": "text:equal",
-                      "b": "log_expense"
+                      "b": "log_expense",
+                      "o": "text:equal"
                     }
                   ]
                 ]
               },
               "mapper": {
+                "text": "✅ <b>ჩაიწერა / Logged</b>\n\n{{7.parameters.description}}\n<b>{{formatNumber(7.parameters.amount_gel; 2; \".\"; \",\")}} ₾</b> · {{7.parameters.category}} · {{7.parameters.treatment}}\n{{7.parameters.counterparty}}\n{{7.parameters.date}}\n\n/balance — სად ვართ",
                 "chatId": "{{1.message.chat.id}}",
-                "parseMode": "HTML",
-                "text": "✅ <b>ჩაიწერა / Logged</b>\n\n{{7.parameters.description}}\n<b>{{formatNumber(7.parameters.amount_gel; 2; \".\"; \",\")}} ₾</b> · {{7.parameters.category}} · {{7.parameters.treatment}}\n{{if(7.parameters.counterparty = \"\"; \"\"; 7.parameters.counterparty)}}\n{{7.parameters.date}}\n\n{{if(7.parameters.confidence < 0.8; \"⚠️ ვერ ვარ დარწმუნებული კატეგორიაში — შეასწორეთ ცხრილში თუ საჭიროა.\"; \"\")}}\n\n/balance — სად ვართ"
+                "parseMode": "HTML"
               },
+              "module": "telegram:SendReplyMessage",
+              "version": 1,
               "metadata": {
                 "designer": {
                   "x": 1800,
                   "y": 150,
                   "name": "Reply: logged"
                 }
+              },
+              "parameters": {
+                "__IMTCONN__": null
               }
             },
             {
               "id": 10,
-              "module": "telegram:SendReplyMessage",
-              "version": 1,
-              "parameters": {
-                "__IMTCONN__": null
-              },
               "filter": {
                 "name": "Needs a question",
                 "conditions": [
                   [
                     {
                       "a": "{{7.action}}",
-                      "o": "text:equal",
-                      "b": "ask_clarification"
+                      "b": "ask_clarification",
+                      "o": "text:equal"
                     }
                   ]
                 ]
               },
               "mapper": {
+                "text": "❓ {{7.parameters.question_ka}}\n\n<i>{{7.parameters.question_en}}</i>",
                 "chatId": "{{1.message.chat.id}}",
-                "parseMode": "HTML",
-                "text": "❓ {{7.parameters.question_ka}}\n\n<i>{{7.parameters.question_en}}</i>"
+                "parseMode": "HTML"
               },
+              "module": "telegram:SendReplyMessage",
+              "version": 1,
               "metadata": {
                 "designer": {
                   "x": 1800,
                   "y": 300,
                   "name": "Reply: ask"
-                },
-                "notes": "Nothing is written on this path. The owner answers in the next message, which arrives as a fresh update — the agent is stateless, so the answer must repeat the amount."
+                }
+              },
+              "parameters": {
+                "__IMTCONN__": null
               }
             },
             {
               "id": 11,
-              "module": "telegram:SendReplyMessage",
-              "version": 1,
-              "parameters": {
-                "__IMTCONN__": null
-              },
               "filter": {
                 "name": "Large or uncertain",
                 "conditions": [
                   [
                     {
                       "a": "{{7.action}}",
-                      "o": "text:equal",
-                      "b": "confirm_first"
+                      "b": "confirm_first",
+                      "o": "text:equal"
                     }
                   ]
                 ]
               },
               "mapper": {
+                "text": "⚠️ <b>დასადასტურებელია / Confirm</b>\n\n{{7.parameters.description}}\n<b>{{formatNumber(7.parameters.amount_gel; 2; \".\"; \",\")}} ₾</b> · {{7.parameters.category}}\n{{7.parameters.counterparty}}\n{{7.parameters.date}}\n\nდასადასტურებლად გამიგზავნეთ იგივე სიტყვები დამატებით <code>დიახ</code>",
                 "chatId": "{{1.message.chat.id}}",
-                "parseMode": "HTML",
-                "text": "⚠️ <b>დასადასტურებელია / Confirm</b>\n\n{{7.parameters.description}}\n<b>{{formatNumber(7.parameters.amount_gel; 2; \".\"; \",\")}} ₾</b> · {{7.parameters.category}}\n{{7.parameters.counterparty}}\n{{7.parameters.date}}\n\nდასადასტურებლად უპასუხეთ: <code>დიახ</code>",
-                "replyMarkup": "{\"inline_keyboard\":[[{\"text\":\"✅ დიახ / Yes\",\"callback_data\":\"confirm\"},{\"text\":\"❌ არა / No\",\"callback_data\":\"cancel\"}]]}"
+                "parseMode": "HTML"
               },
+              "module": "telegram:SendReplyMessage",
+              "version": 1,
               "metadata": {
                 "designer": {
                   "x": 1800,
                   "y": 450,
                   "name": "Reply: confirm first"
+                }
+              },
+              "parameters": {
+                "__IMTCONN__": null
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 12,
+              "module": "util:SetVariables",
+              "version": 1,
+              "parameters": {},
+              "filter": {
+                "name": "/blocks",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{2.msg}}",
+                      "b": "/blocks",
+                      "o": "text:startwith"
+                    }
+                  ]
+                ]
+              },
+              "mapper": {
+                "scope": "roundtrip",
+                "variables": [
+                  {
+                    "name": "bp",
+                    "value": "{{parseNumber(ifempty(get(split(2.msg; \" \"); 2); \"180\"); \".\")}}"
+                  },
+                  {
+                    "name": "bh",
+                    "value": "{{parseNumber(ifempty(get(split(2.msg; \" \"); 3); \"0.8\"); \".\")}}"
+                  }
+                ]
+              },
+              "metadata": {
+                "designer": {
+                  "x": 900,
+                  "y": -320,
+                  "name": "Read the numbers"
+                }
+              }
+            },
+            {
+              "id": 13,
+              "module": "telegram:SendReplyMessage",
+              "version": 1,
+              "parameters": {
+                "__IMTCONN__": null
+              },
+              "mapper": {
+                "parseMode": "HTML",
+                "chatId": "{{1.message.chat.id}}",
+                "text": "🧱 <b>ბლოკი / BLOCKS</b>\n\nპერიმეტრი {{12.bp}} მ · სიმაღლე {{12.bh}} მ\nფართობი <b>{{formatNumber(12.bp * 12.bh; 1; \".\"; \",\")}} მ²</b>\n\nბლოკი 40×20×20: <b>{{formatNumber(ceil(12.bp * 12.bh * 11.6144 * 1.05); 0; \".\"; \",\")}} ცალი</b>\nცემენტი: <b>{{ceil(12.bp * 12.bh * 0.0141723 * 1.15 * 350 / 50)}} ტომარა</b> (50 კგ)\nქვიშა: <b>{{formatNumber(12.bp * 12.bh * 0.0141723 * 1.15 * 1.05; 1; \".\"; \",\")}} მ³</b>\n\n<i>ნაკერი 1 სმ · მარაგი 5% ბლოკზე, 15% ხსნარზე · ღიობები გამოკლებული არ არის</i>\n<i>1 cm joints, 5% block and 15% mortar waste, no openings deducted</i>"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": -320,
+                  "name": "Reply: blocks"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 14,
+              "module": "util:SetVariables",
+              "version": 1,
+              "parameters": {},
+              "filter": {
+                "name": "/foundation",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{2.msg}}",
+                      "b": "/foundation",
+                      "o": "text:startwith"
+                    }
+                  ]
+                ]
+              },
+              "mapper": {
+                "scope": "roundtrip",
+                "variables": [
+                  {
+                    "name": "fl",
+                    "value": "{{parseNumber(ifempty(get(split(2.msg; \" \"); 2); \"180\"); \".\")}}"
+                  },
+                  {
+                    "name": "fw",
+                    "value": "{{parseNumber(ifempty(get(split(2.msg; \" \"); 3); \"0.40\"); \".\")}}"
+                  },
+                  {
+                    "name": "fd",
+                    "value": "{{parseNumber(ifempty(get(split(2.msg; \" \"); 4); \"0.50\"); \".\")}}"
+                  }
+                ]
+              },
+              "metadata": {
+                "designer": {
+                  "x": 900,
+                  "y": -490,
+                  "name": "Read the numbers"
+                }
+              }
+            },
+            {
+              "id": 15,
+              "module": "telegram:SendReplyMessage",
+              "version": 1,
+              "parameters": {
+                "__IMTCONN__": null
+              },
+              "mapper": {
+                "parseMode": "HTML",
+                "chatId": "{{1.message.chat.id}}",
+                "text": "🏗 <b>საძირკველი / FOUNDATION</b>\n\nსიგრძე {{14.fl}} მ · კვეთა {{14.fw}} × {{14.fd}} მ\n\nბეტონი: <b>{{formatNumber(14.fl * 14.fw * 14.fd * 1.05; 1; \".\"; \",\")}} მ³</b>\nმოსასწორებელი: <b>{{formatNumber(14.fl * 14.fw * 0.05; 1; \".\"; \",\")}} მ³</b>\nხრეში — ბალიში: <b>{{formatNumber(14.fl * 14.fw * 0.10; 1; \".\"; \",\")}} მ³</b>\nცემენტი: <b>{{ceil((14.fl * 14.fw * 14.fd * 1.05 * 320 + 14.fl * 14.fw * 0.05 * 200) / 50)}} ტომარა</b> (50 კგ)\nქვიშა: <b>{{formatNumber(14.fl * 14.fw * 14.fd * 1.05 * 0.45; 1; \".\"; \",\")}} მ³</b>\nღორღი: <b>{{formatNumber(14.fl * 14.fw * 14.fd * 1.05 * 0.85; 1; \".\"; \",\")}} მ³</b>\nარმატურა: <b>{{formatNumber(ceil((14.fl * 4 * 1.1 * 0.889 + (ceil(14.fl / 0.3) + 1) * (2 * (14.fw - 0.08) + 2 * (14.fd - 0.08) + 0.1) * 0.395) * 1.05); 0; \".\"; \",\")}} კგ</b>\nგრუნტი: <b>{{formatNumber(14.fl * (14.fw + 0.2) * (14.fd + 0.15); 1; \".\"; \",\")}} მ³</b>\n\n⚠️ <b>კვეთა და არმატურა ჯიესენის ნახაზიდან აიღეთ — ეს პროექტი არ არის.</b>\n<i>Section and rebar are placeholders — take them from GSN's drawing. Not a design.</i>"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": -490,
+                  "name": "Reply: foundation"
                 },
-                "notes": "THE MONEY GATE. Anything at or above 10,000 GEL, or parsed with low confidence, stops here until the owner taps. Wiring the callback back into this scenario is step 7 of docs/02-setup.md; until that is done the owner re-sends the message with the word 'დიახ' and it goes down the log_expense path."
+                "notes": "Constants match construction/Foundation_Calculator.xlsx exactly: 320 kg cement per m3 of structural concrete plus 200 kg per m3 of blinding, 0.45 m3 sand and 0.85 m3 stone per m3, 5% concrete waste, 5 cm blinding and 10 cm gravel under the footing, rebar 4xO12 longitudinal with O8 stirrups at 300 and 40 mm cover. Leaving the blinding cement out made the bot answer 242 bags where the sheet said 257. If a constant changes in the spreadsheet it must change here in the same commit."
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 16,
+              "module": "telegram:SendReplyMessage",
+              "version": 1,
+              "parameters": {
+                "__IMTCONN__": null
+              },
+              "filter": {
+                "name": "/help or /start",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{2.msg}}",
+                      "b": "/help",
+                      "o": "text:startwith"
+                    }
+                  ],
+                  [
+                    {
+                      "a": "{{2.msg}}",
+                      "b": "/start",
+                      "o": "text:startwith"
+                    }
+                  ]
+                ]
+              },
+              "mapper": {
+                "parseMode": "HTML",
+                "chatId": "{{1.message.chat.id}}",
+                "text": "<b>მუხრანი 2026</b>\n\n<b>/balance</b> — ბიუჯეტი და დახარჯული\n\n<b>/blocks [პერიმეტრი] [სიმაღლე]</b>\nმაგ. <code>/blocks 180 0.8</code> — ბლოკი, ცემენტი, ქვიშა\n\n<b>/foundation [სიგრძე] [სიგანე] [სიღრმე]</b>\nმაგ. <code>/foundation 180 0.4 0.5</code> — ბეტონი, ცემენტი, ქვიშა, ღორღი, არმატურა\n\nხარჯის ჩასაწერად უბრალოდ დაწერეთ:\n<code>ბეტონი 250 ლარი</code>\n\n<i>Numbers are optional — leave them out and the defaults are used.</i>"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 900,
+                  "y": -650,
+                  "name": "Reply: help"
+                }
               }
             }
           ]
         }
-      ]
+      ],
+      "version": 1,
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0,
+          "name": "Command or expense?"
+        }
+      },
+      "parameters": {}
     }
   ],
   "metadata": {
     "instant": true,
     "version": 1,
+    "designer": {
+      "orphans": []
+    },
     "scenario": {
-      "roundtrips": 1,
+      "dlq": false,
       "maxErrors": 3,
       "autoCommit": true,
-      "autoCommitTriggerLast": true,
+      "roundtrips": 1,
       "sequential": true,
       "confidential": false,
-      "dlq": false,
-      "freshVariables": false
+      "freshVariables": false,
+      "autoCommitTriggerLast": true
     },
-    "designer": {
-      "orientation": "horizontal"
-    },
-    "zone": "eu1.make.com",
     "notes": [
-      "Replace four placeholders before the first run: <<OWNER_CHAT_ID>>, <<LEDGER_SPREADSHEET_ID>>, <<LEDGER_TAB_NAME>> (modules 4 and 8), and the system prompt in module 6.",
-      "Module identifiers verified against the Make API on 17 Sep 2026: anthropic-claude:createAMessage (NOT createMessage), google-sheets:addRow/filterRows v2, telegram:SendReplyMessage v1.",
-      "Module configuration verified with validate_module_configuration on 17 Sep 2026. Three things Make rejects silently: a bare 'ne' filter operator, a 'mode' field on filterRows, and a messages[] entry without inputType. Any of them leaves the scenario isinvalid and un-activatable, with no error shown until you try to switch it on.",
-      "Google Sheets returns an empty range for a column that is blank in every row. Filtering on such a column yields zero rows with no error at all, so /balance answers 0 instead of failing. Filter on a column that is always populated.",
-      "The gateway webhook MUST NOT have API key authentication. Telegram sends plain POSTs with no custom headers, so an authenticated hook rejects every update. Make cannot remove the authentication once set - create a fresh unauthenticated hook instead.",
-      "An invalid Anthropic API key on the connection also makes the scenario isinvalid: Make cannot resolve the model list and marks module 6 unconfigured. Fix the connection before trying to activate.",
+      "Replace four placeholders before the first run: <<OWNER_CHAT_ID>> (module 2), <<LEDGER_SPREADSHEET_ID>> and <<LEDGER_TAB_NAME>> (modules 4 and 8), and the system prompt in module 6.",
+      "Five router routes: /balance reads the ledger; anything not starting with / goes to Claude; /blocks and /foundation are pure Make arithmetic; /help and /start print the command list.",
+      "The calculator routes deliberately make NO model call. Their constants are copied from construction/Block_Calculator.xlsx and construction/Foundation_Calculator.xlsx, so the bot and the spreadsheets always give the same number - change one and change the other in the same commit. The foundation cement figure counts the blinding layer as well as the footing; leaving it out answered 242 bags where the sheet said 257.",
+      "Module 6 carries an onerror chain ending in builtin:Ignore. This is not decoration: on 17, 18 and 21 September an Anthropic failure on that module made Make mark the whole scenario isinvalid and switch it off, taking /balance and the calculators down with it. Ignore keeps a model failure to the one bundle that caused it, and the owner is told in plain words instead of meeting silence.",
+      "Module identifiers verified against the Make API on 17 and 21 Sep 2026: anthropic-claude:createAMessage (NOT createMessage), google-sheets:addRow/filterRows v2, telegram:SendReplyMessage v1, util:SetVariable2 for one variable and util:SetVariables for several, builtin:Ignore v1.",
+      "Module configuration verified with validate_module_configuration. Three things Make rejects silently: a bare 'ne' filter operator, a 'mode' field on filterRows, and a messages[] entry without inputType. Any of them leaves the scenario isinvalid and un-activatable, with no error shown until you try to switch it on.",
+      "Make's expression argument separator is a semicolon everywhere: formatNumber(n; 2; \".\"; \",\"). A comma between the last two arguments looks right and formats wrongly.",
+      "Google Sheets returns an empty range for a column that is blank in every row. Filtering on such a column yields zero rows with no error at all, so /balance answers 0 instead of failing. Filter on a column that is always populated - here column A.",
+      "The /balance route filters on the literal '/balance', not on '/', so a calculator command never touches the sheet.",
       "No WebhookRespond module: it is unsupported alongside sequential processing, and Make returns 200 by itself. sequential stays on so two quick messages cannot race into the same sheet row."
     ]
   }
