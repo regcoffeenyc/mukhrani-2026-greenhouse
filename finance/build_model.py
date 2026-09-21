@@ -822,11 +822,12 @@ put(ac, "A2", "ეს ფურცელი ამონაწერის ა�
 
 meta = [
     ("წყარო / Source files", "transaction_history_all_accounts_20260401_20260909.csv · "
-                             "transaction_history_all_accounts_20260911_20260918.xlsx (Google Drive)"),
+                             "transaction_history_all_accounts_20260911_20260918.xlsx (Google Drive) · "
+                             "19–21/09 მფლობელის მონაცემი, ამონაწერით დასადასტურებელი / reported by the owner, to be confirmed against the statement"),
     ("ანგარიში / Account", "GE66CR0000009572073602"),
     ("მფლობელი / Account name", "შპს მუხრანი 2026 / LLC Mukhrani 2026"),
-    ("მოთხოვნილი პერიოდი / Period requested", "01/04/2026 – 18/09/2026"),
-    ("ფაქტობრივი ჩანაწერები / Entries present", "01/07/2026 – 18/09/2026 · 28 გადარიცხვა / 28 payments"),
+    ("მოთხოვნილი პერიოდი / Period requested", "01/04/2026 – 21/09/2026"),
+    ("ფაქტობრივი ჩანაწერები / Entries present", "01/07/2026 – 21/09/2026 · 30 გადარიცხვა / 30 payments"),
     ("ჩარიცხვა / Inflow", "14/09/2026 — 30,000 ₾, კრედიტის ტრანში GA/1-876787-001 — ხარჯი არ არის, ქვემოთ არ ითვლება / "
                           "a tranche of the credit, not an expense, excluded below"),
 ]
@@ -879,6 +880,10 @@ txns = [
     (date(2026, 9, 18), "მომსახურება", "რაუფ ბაირამოვი", CAT_SVC, -820.00),
     (date(2026, 9, 18), "ამწე მომსახურება — სამონტაჟო სამუშაო, კაპიტალიზებული", "აკაკი ბუჩაშვილი", CAT_OTH, -550.00),
     (date(2026, 9, 18), "საბანკო საკომისიოები — 11 გადარიცხვა, 11–18/09/2026", "სს ბანკი ქართუ", CAT_OTH, -12.08),
+    # --- მფლობელის მონაცემი, 21/09/2026 / reported by the owner, 21 September ---
+    (date(2026, 9, 19), "ავანსი ხელშეკრულება N1 (40 000 აშშ დოლარი, ერ.კ. 2.6125)",
+     "შპს ჯიესენ გრუპ", CAT_BUILD, -104500.00),
+    (date(2026, 9, 21), "მუშების კვება — საქვეანგარიშოდ დირექტორზე", "გოდერძი მეტრეველი", CAT_SVC, -10000.00),
 ]
 TR0 = 13
 for i, (d, desc, cp, cat, amt) in enumerate(txns):
@@ -919,7 +924,7 @@ put(ac, f"A{MS+1}", "თვე / Month", H1, fill=FILL_H)
 put(ac, f"B{MS+1}", "თანხა GEL / Amount", H1, fill=FILL_H, align="center")
 for i, (lab, y, m, last) in enumerate([("ივლისი 2026 / July", 2026, 7, 31),
                                        ("აგვისტო 2026 / August", 2026, 8, 31),
-                                       ("სექტემბერი 2026 (18-მდე) / September (to the 18th)", 2026, 9, 30)]):
+                                       ("სექტემბერი 2026 (21-მდე) / September (to the 21st)", 2026, 9, 30)]):
     r = MS + 2 + i
     put(ac, f"A{r}", lab, TXT, border=BOX)
     put(ac, f"B{r}",
@@ -1035,7 +1040,7 @@ for col, h in zip("ABCD", ["თვე / Month", "ხარჯი / Spend", "კ�
     put(bg, f"{col}24", h, H1, fill=FILL_H, align="center")
 for i, (lab, src) in enumerate([("ივლისი 2026 / July", A_MONTH_ROW[0]),
                                 ("აგვისტო 2026 / August", A_MONTH_ROW[1]),
-                                ("სექტემბერი 2026 (18-მდე) / September (to the 18th)", A_MONTH_ROW[2])]):
+                                ("სექტემბერი 2026 (21-მდე) / September (to the 21st)", A_MONTH_ROW[2])]):
     r = 25 + i
     put(bg, f"A{r}", lab, TXT, border=BOX)
     put(bg, f"B{r}", f"=Actuals!B{src}", LNK, fmt=GEL2, border=BOX, align="right")
@@ -1061,10 +1066,10 @@ put(bg, "A33", "გადახდილი ავანსი / Advances paid",
 # The September advance was paid in lari against a contract priced in dollars.
 # It is converted at the contract's own reference rate, so the GEL outstanding
 # on row 34 falls by exactly the 2,900 GEL paid.
-put(bg, "B33", "=22000+5000+2900/Assumptions!$B$28", TXT, fmt='#,##0', border=BOX, align="right")
+put(bg, "B33", "=22000+5000+40000+2900/Assumptions!$B$28", TXT, fmt='#,##0', border=BOX, align="right")
 put(bg, "C33", "=IFERROR(D33/B33,0)", TXT, fmt='0.0000', border=BOX, align="right")
 put(bg, "D33", f"=Actuals!B{A_CAT_ROW[CAT_BUILD]}", LNK, fmt=GEL2, border=BOX, align="right")
-put(bg, "G33", "09/07/2026 — 22,000 $ · 04/08/2026 — 5,000 $ · 14/09/2026 — 2,900 ₾ ≈ 1,099 $ (ერ.კ. 2.6384)", NOTE)
+put(bg, "G33", "09/07 — 22,000 $ · 04/08 — 5,000 $ · 14/09 — 2,900 ₾ ≈ 1,099 $ (ერ.კ. 2.6384) · 19/09 — 40,000 $ ერ.კ. 2.6125", NOTE)
 put(bg, "A34", "დარჩენილი გადასახდელი / Outstanding", BOLD, fill=FILL_TOT, border=BOX)
 put(bg, "B34", "=B32-B33", BOLD, fmt='#,##0', fill=FILL_TOT, border=BOX, align="right")
 put(bg, "C34", "=Assumptions!$B$28", LNK, fmt='0.0000', fill=FILL_TOT, border=BOX, align="right")

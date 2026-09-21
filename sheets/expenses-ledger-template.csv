@@ -27,3 +27,5 @@ date,description,counterparty,category,treatment,amount_gel,currency,amount_orig
 2026-09-18,მომსახურება,რაუფ ბაირამოვი,services,OPEX,820,GEL,820,1,bank,,bank_statement,import,2026-09-18 00:00,1,live,
 2026-09-18,ამწე მომსახურება — სამონტაჟო სამუშაო,აკაკი ბუჩაშვილი,other,CAPEX,550,GEL,550,1,bank,,bank_statement,import,2026-09-18 00:00,1,live,კაპიტალიზებული
 2026-09-18,"საბანკო საკომისიოები — 11 გადარიცხვა, 11–18/09/2026",სს ბანკი ქართუ,other,CAPEX,12.08,GEL,12.08,1,bank,,bank_statement,import,2026-09-18 00:00,1,live,აგრეგირებული
+2026-09-19,ავანსი ხელშეკრულება N1,შპს ჯიესენ გრუპი,construction_advance,CAPEX,104500,USD,40000,2.6125,bank,N1,owner_reported,claude,2026-09-21 00:00,1,live,მფლობელის მონაცემი; ამონაწერით დასადასტურებელი
+2026-09-21,მუშების კვება — საქვეანგარიშოდ დირექტორზე,გოდერძი მეტრეველი,services,OPEX,10000,GEL,10000,1,bank,,owner_reported,claude,2026-09-21 00:00,1,live,საქვეანგარიშო ავანსი; ჩეკები და ანგარიშგება საჭიროა
