@@ -145,7 +145,8 @@ project: do not switch it back on.
 | `/foundation 180 0.4 0.5` | 37.8 m³ concrete · 257 bags · 1,133 kg rebar |
 | `ბეტონი 250 ლარი` | ✅ logged, materials, CAPEX — check the row landed in the sheet |
 | `ჯიესენს გადავუხადე 20000 დოლარი` | ❓ a question about the exchange rate, and **no** new row |
-| `ჯიესენ გრუპს ავანსი 35000 ლარი` | ⚠️ asked to confirm, and **no** row until you re-send |
+| `ჯიესენ გრუპს ავანსი 35000 ლარი` | ⚠️ asked to confirm, and **no** row |
+| the same line again with `დიახ` on the end | ✅ now it is written — see section 10 |
 | `104 500 ცემენტი` | ❓ told to write the amount without a separator, and **no** row |
 | From a different Telegram account | nothing at all — no reply, no row |
 
@@ -232,14 +233,34 @@ other than a quick number on site, open the spreadsheet.
 The foundation figures are a take-off, not a design. The section and the
 reinforcement come from GSN Group's drawings; the reply says so every time.
 
-## 10. Wire the confirm buttons (optional, later)
+## 10. The 10,000 GEL gate
 
-Out of the box, a confirmation shows buttons but the tap does nothing — you
-re-send the expense with the word `დიახ` and it goes through. To make the buttons
-live, add a route at the top router filtered on
-`{{1.callback_query.data}} = "confirm"` that re-runs the append using the values
-carried in `callback_query.message.text`. It is genuinely optional; the manual
-path is safe, just slower.
+Anything at or above 10,000 GEL is never written on the first message. The bot
+replies with what it read and hands back the exact line to send:
+
+```
+ცემენტი 104500 დიახ
+```
+
+The word `დიახ` in the message is what releases it. Module 20 reads it into
+`ok`; module 22 turns `confirm_first` into `log_expense` when it is present —
+for the model's decision and the fallback's alike, so the gate behaves the same
+whether or not Anthropic is answering.
+
+**This was broken until 21 September 2026 and worth understanding.** The reply
+told the owner to re-send with `დიახ`, but nothing anywhere read that word. The
+re-send was parsed exactly like the first message, hit the same threshold, and
+produced the same reply — forever. No payment at or above 10,000 could be
+recorded through the bot at all. It was found trying to log 104,500 GEL, which
+is most of a month's spend.
+
+The lesson is not about this one word. A gate is only a gate if something on the
+other side opens it; an instruction in a reply is not an implementation. If you
+add another confirmation step, wire the exit before you write the prompt.
+
+Buttons would be nicer than a word. To add them, put a route on the top router
+filtered on `{{1.callback_query.data}} = "confirm"` that re-runs the append from
+the values carried in `callback_query.message.text`. Optional — the word works.
 
 ---
 

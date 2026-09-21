@@ -159,8 +159,12 @@
                     "value": "{{if(contains(2.msg; \"$\"); \"yes\"; if(replace(lower(2.msg); \"/(დოლარ|dollar|usd|euro|eur|ევრო)/g\"; \"@\") = lower(2.msg); \"no\"; \"yes\"))}}"
                   },
                   {
+                    "name": "ok",
+                    "value": "{{if(contains(2.msg; \"დიახ\"); \"yes\"; \"no\")}}"
+                  },
+                  {
                     "name": "desc",
-                    "value": "{{trim(replace(replace(replace(replace(replace(replace(replace(replace(2.msg; \"/[0-9]+([.,][0-9]+)?/g\"; \" \"); \"ლარად\"; \" \"); \"ლარის\"; \" \"); \"ლარს\"; \" \"); \"ლარი\"; \" \"); \"₾\"; \" \"); \"/(gel|lari)/gi\"; \" \"); \"/ +/g\"; \" \"))}}"
+                    "value": "{{trim(replace(replace(replace(replace(replace(replace(replace(replace(replace(2.msg; \"/[0-9]+([.,][0-9]+)?/g\"; \" \"); \"დიახ\"; \" \"); \"ლარად\"; \" \"); \"ლარის\"; \" \"); \"ლარს\"; \" \"); \"ლარი\"; \" \"); \"₾\"; \" \"); \"/(gel|lari)/gi\"; \" \"); \"/ +/g\"; \" \"))}}"
                   }
                 ]
               },
@@ -170,7 +174,7 @@
                   "y": 150,
                   "name": "Read it without a model"
                 },
-                "notes": "Runs BEFORE the model and never fails: amount, description and two safety flags, by pattern match alone. risky catches a thousands separator (104 500 or 104,500) which would otherwise be read as 104; fx catches a foreign currency, which cannot be converted without a rate. Either one sends the message back as a question instead of writing a row. The currency words are stripped by PLAIN STRING replace, longest form first, not by regex: a Unicode character class with an /i flag silently did nothing here on 21 September and left 'lari' in every description. Longest first matters - replacing the short form before the long one would leave a stray letter behind."
+                "notes": "Runs BEFORE the model and never fails: amount, description and two safety flags, by pattern match alone. risky catches a thousands separator (104 500 or 104,500) which would otherwise be read as 104; fx catches a foreign currency, which cannot be converted without a rate. Either one sends the message back as a question instead of writing a row. The currency words are stripped by PLAIN STRING replace, longest form first, not by regex: a Unicode character class with an /i flag silently did nothing here on 21 September and left 'lari' in every description. Longest first matters - replacing the short form before the long one would leave a stray letter behind. ok is the confirmation word. Without it a payment at or above 10,000 could never be logged at all: the reply asked the owner to re-send with დიახ, the re-send was read the same way, and it returned to the same question forever. Found on 21 September trying to log 104,500."
               }
             },
             {
@@ -263,7 +267,7 @@
                 "variables": [
                   {
                     "name": "mode",
-                    "value": "{{if(length(7.action) > 0; 7.action; if(20.fx = \"yes\"; \"ask_fx\"; if(20.risky = \"yes\"; \"ask_sep\"; if(20.amt = 0; \"ask_amt\"; if(20.amt >= 10000; \"confirm_first\"; \"log_expense\")))))}}"
+                    "value": "{{if(length(7.action) > 0; if(7.action = \"confirm_first\"; if(20.ok = \"yes\"; \"log_expense\"; \"confirm_first\"); 7.action); if(20.fx = \"yes\"; \"ask_fx\"; if(20.risky = \"yes\"; \"ask_sep\"; if(20.amt = 0; \"ask_amt\"; if(20.amt >= 10000; if(20.ok = \"yes\"; \"log_expense\"; \"confirm_first\"); \"log_expense\")))))}}"
                   },
                   {
                     "name": "byhand",
@@ -277,7 +281,7 @@
                   "y": 150,
                   "name": "Model or fallback?"
                 },
-                "notes": "The single decision point. If the model answered, its action is used unchanged. If it did not - no credit, bad JSON, timeout - the deterministic reading decides, and byhand=yes marks the row and the reply so the owner knows to check the category."
+                "notes": "The single decision point. If the model answered, its action is used unchanged - except that confirm_first plus the word დიახ becomes log_expense, which is the only way out of the confirm gate. If the model did not answer, the deterministic reading decides on the same rule, so the gate behaves identically with or without it. byhand=yes marks the row and the reply so the owner knows to check the category."
               }
             },
             {
@@ -379,7 +383,7 @@
                     {
                       "id": 11,
                       "mapper": {
-                        "text": "⚠️ <b>დასადასტურებელია / Confirm</b>\n\n{{ifempty(7.parameters.description; 20.desc)}}\n<b>{{formatNumber(ifempty(7.parameters.amount_gel; 20.amt); 2; \".\"; \",\")}} ₾</b> · {{ifempty(7.parameters.category; \"other\")}}\n{{7.parameters.counterparty}}\n\n10,000 ₾-ზე მეტია. დასადასტურებლად გამიგზავნეთ იგივე ტექსტი სიტყვით <code>დიახ</code>.\n<i>Above the 10,000 confirm threshold. Nothing has been written. Re-send with the word დიახ.</i>",
+                        "text": "⚠️ <b>დასადასტურებელია / Confirm</b>\n\n{{ifempty(7.parameters.description; 20.desc)}}\n<b>{{formatNumber(ifempty(7.parameters.amount_gel; 20.amt); 2; \".\"; \",\")}} ₾</b> · {{ifempty(7.parameters.category; \"other\")}}\n{{7.parameters.counterparty}}\n\n10,000 ₾-ზე მეტია — არაფერი ჩაწერილა.\nდასადასტურებლად გამიგზავნეთ იგივე ტექსტი <b>დიახ</b>-ით:\n<code>{{ifempty(7.parameters.description; 20.desc)}} {{ifempty(7.parameters.amount_gel; 20.amt)}} დიახ</code>\n\n<i>Above the 10,000 threshold. Nothing has been written. Send it again with the word დიახ and it goes in.</i>",
                         "chatId": "{{1.message.chat.id}}",
                         "parseMode": "HTML"
                       },
@@ -390,7 +394,8 @@
                           "x": 1800,
                           "y": 450,
                           "name": "Reply: confirm first"
-                        }
+                        },
+                        "notes": "The reply hands back the exact line to send. Before 21 September it said 'resend with დიახ' while nothing read that word, so the re-send produced this same message again and a payment over 10,000 could never be recorded at all."
                       },
                       "parameters": {
                         "__IMTCONN__": null
@@ -718,7 +723,8 @@
       "Make's expression argument separator is a semicolon everywhere: formatNumber(n; 2; \".\"; \",\"). A comma between the last two arguments looks right and formats wrongly.",
       "A filter stops the whole branch it sits on, so mutually exclusive outcomes need a router, not a sequence of filtered modules. That is why module 21 exists.",
       "Google Sheets returns an empty range for a column that is blank in every row. Filtering on such a column yields zero rows with no error at all, so /balance answers 0 instead of failing. Filter on a column that is always populated - here column A.",
-      "No WebhookRespond module: it is unsupported alongside sequential processing, and Make returns 200 by itself. sequential stays on so two quick messages cannot race into the same sheet row."
+      "No WebhookRespond module: it is unsupported alongside sequential processing, and Make returns 200 by itself. sequential stays on so two quick messages cannot race into the same sheet row.",
+      "The 10,000 GEL gate is released by the word დიახ in the message, read by module 20 into `ok` and applied in module 22 to BOTH the model's confirm_first and the fallback's. Until 21 September nothing read that word, so the gate had no exit and no payment at or above 10,000 could be recorded through the bot at all."
     ]
   }
 }

@@ -94,8 +94,18 @@ for a foreign-currency payment, or a photo you cannot read.
 
 ### `confirm_first`
 The record is complete but large — `amount_gel` at or above **10,000 GEL** — or
-`confidence` is below 0.6. Same `parameters` as `log_expense`; the scenario will
-show it to the owner with Confirm / Cancel buttons instead of writing it.
+`confidence` is below 0.6. Same `parameters` as `log_expense`; the scenario
+shows it to the owner and writes nothing.
+
+**The exception that releases it:** if the message *also* contains the word
+`დიახ`, the owner is confirming something you already returned. Return
+`log_expense` instead, with `needs_approval` false. Leave `დიახ` in the
+description if that is where it falls — the scenario strips it before writing.
+
+Without that exception the gate has no exit: the reply asks for a re-send with
+`დიახ`, and the re-send is just another message at the same amount. That is
+exactly what happened until 21 September 2026, and no payment at or above 10,000
+could be recorded at all.
 
 ### `no_action`
 The message is not an expense — a greeting, a question, chatter. Set
