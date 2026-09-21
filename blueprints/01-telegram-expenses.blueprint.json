@@ -7,7 +7,7 @@
       "module": "gateway:CustomWebHook",
       "version": 1,
       "metadata": {
-        "notes": "Create the hook, copy its URL, then point the bot at it once: https://api.telegram.org/bot<TOKEN>/setWebhook?url=<THIS_URL>. The hook must have NO API key authentication - Telegram sends plain POSTs and cannot add a header, so an authenticated hook rejects every update, and Make cannot remove the authentication afterwards. Telegram posts the whole update object here, so 1.message.text, 1.message.chat.id, 1.message.photo[] and 1.message.caption are all available downstream. See docs/02-setup.md.",
+        "notes": "Create the hook, copy its URL, then point the bot at it once: https://api.telegram.org/bot<TOKEN>/setWebhook?url=<THIS_URL>. The hook must have NO API key authentication - Telegram sends plain POSTs and cannot add a header, so an authenticated hook rejects every update, and Make cannot remove the authentication afterwards. See docs/02-setup.md.",
         "designer": {
           "x": 0,
           "y": 0,
@@ -91,7 +91,7 @@
               "module": "google-sheets:filterRows",
               "version": 2,
               "metadata": {
-                "notes": "Filter on column A (date), which every row has. Do NOT filter on column P: Google returns an empty range for an all-blank column, so the filter matched nothing and /balance answered 0 records against a real ledger. sheetId is the TAB name - check it in the Sheet Name dropdown rather than assuming.",
+                "notes": "Filter on column A (date), which every row has. Do NOT filter on column P: Google returns an empty range for an all-blank column, so the filter matched nothing and /balance answered 0 records against a real ledger. sheetId is the TAB name, not the file name; check it in the Sheet Name dropdown rather than assuming.",
                 "designer": {
                   "x": 900,
                   "y": -150,
@@ -127,7 +127,10 @@
         {
           "flow": [
             {
-              "id": 6,
+              "id": 20,
+              "module": "util:SetVariables",
+              "version": 1,
+              "parameters": {},
               "filter": {
                 "name": "Not a command",
                 "conditions": [
@@ -140,6 +143,38 @@
                   ]
                 ]
               },
+              "mapper": {
+                "scope": "roundtrip",
+                "variables": [
+                  {
+                    "name": "amt",
+                    "value": "{{if(replace(2.msg; \"/[0-9]/g\"; \"\") = 2.msg; 0; parseNumber(replace(replace(2.msg; \"/^[^0-9]*([0-9]+(?:[.,][0-9]{1,2})?).*$/\"; \"$1\"); \",\"; \".\"); \".\"))}}"
+                  },
+                  {
+                    "name": "risky",
+                    "value": "{{if(replace(2.msg; \"/[0-9][ .,][0-9]{3}/g\"; \"@\") = 2.msg; \"no\"; \"yes\")}}"
+                  },
+                  {
+                    "name": "fx",
+                    "value": "{{if(contains(2.msg; \"$\"); \"yes\"; if(replace(lower(2.msg); \"/(დოლარ|dollar|usd|euro|eur|ევრო)/g\"; \"@\") = lower(2.msg); \"no\"; \"yes\"))}}"
+                  },
+                  {
+                    "name": "desc",
+                    "value": "{{trim(replace(replace(replace(2.msg; \"/[0-9]+([.,][0-9]+)?/g\"; \" \"); \"/(ლარად|ლარის|ლარს|ლარი|ლარ|₾|gel|lari)/gi\"; \" \"); \"/ +/g\"; \" \"))}}"
+                  }
+                ]
+              },
+              "metadata": {
+                "designer": {
+                  "x": 700,
+                  "y": 150,
+                  "name": "Read it without a model"
+                },
+                "notes": "Runs BEFORE the model and never fails: amount, description and two safety flags, by pattern match alone. risky catches a thousands separator (104 500 or 104,500) which would otherwise be read as 104; fx catches a foreign currency, which cannot be converted without a rate. Either one sends the message back as a question instead of writing a row."
+              }
+            },
+            {
+              "id": 6,
               "mapper": {
                 "model": "claude-sonnet-4-6",
                 "system": "<<PASTE prompts/00-conventions.md THEN prompts/01-expense-agent.md>>",
@@ -160,43 +195,24 @@
                   "x": 900,
                   "y": 150,
                   "name": "Claude: parse the expense"
-                }
+                },
+                "notes": "Resume, not Ignore: when the model call fails the scenario carries on with an empty bundle and module 22 falls back to the deterministic reading, so the expense is still recorded. Ignore would have skipped the write altogether. An Anthropic failure killed this scenario outright on 17, 18 and 21 September - with a handler here it costs nothing at all."
               },
               "parameters": {
                 "__IMTCONN__": null
               },
               "onerror": [
                 {
-                  "id": 60,
-                  "module": "telegram:SendReplyMessage",
+                  "id": 62,
+                  "module": "builtin:Resume",
                   "version": 1,
-                  "parameters": {
-                    "__IMTCONN__": null
-                  },
-                  "mapper": {
-                    "text": "⚠️ ხარჯის ავტომატური ამოცნობა ამჟამად არ მუშაობს (Anthropic-ის ბალანსი).\nკალკულატორები და /balance მუშაობს.\n\n<i>Expense parsing is down (Anthropic credit). The calculators and /balance still work.</i>",
-                    "chatId": "{{1.message.chat.id}}",
-                    "parseMode": "HTML"
-                  },
-                  "metadata": {
-                    "designer": {
-                      "x": 900,
-                      "y": 330,
-                      "name": "Tell the owner, do not die"
-                    }
-                  }
-                },
-                {
-                  "id": 61,
-                  "module": "builtin:Ignore",
-                  "version": 1,
-                  "mapper": {},
                   "parameters": {},
+                  "mapper": {},
                   "metadata": {
                     "designer": {
-                      "x": 1200,
-                      "y": 330,
-                      "name": "Skip the bundle"
+                      "x": 0,
+                      "y": 0,
+                      "name": "Carry on without it"
                     }
                   }
                 }
@@ -214,162 +230,274 @@
                   "x": 1200,
                   "y": 150,
                   "name": "Parse JSON"
-                }
+                },
+                "notes": "Same handler: if the model broke the JSON contract, fall through to the deterministic reading rather than failing."
               },
               "parameters": {
                 "type": null
-              }
+              },
+              "onerror": [
+                {
+                  "id": 63,
+                  "module": "builtin:Resume",
+                  "version": 1,
+                  "parameters": {},
+                  "mapper": {},
+                  "metadata": {
+                    "designer": {
+                      "x": 0,
+                      "y": 0,
+                      "name": "Carry on without it"
+                    }
+                  }
+                }
+              ]
             },
             {
-              "id": 8,
-              "filter": {
-                "name": "Only a clean log_expense",
-                "conditions": [
-                  [
-                    {
-                      "a": "{{7.action}}",
-                      "b": "log_expense",
-                      "o": "text:equal"
-                    }
-                  ]
+              "id": 22,
+              "module": "util:SetVariables",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "scope": "roundtrip",
+                "variables": [
+                  {
+                    "name": "mode",
+                    "value": "{{if(length(7.action) > 0; 7.action; if(20.fx = \"yes\"; \"ask_fx\"; if(20.risky = \"yes\"; \"ask_sep\"; if(20.amt = 0; \"ask_amt\"; if(20.amt >= 10000; \"confirm_first\"; \"log_expense\")))))}}"
+                  },
+                  {
+                    "name": "byhand",
+                    "value": "{{if(length(7.action) > 0; \"no\"; \"yes\")}}"
+                  }
                 ]
               },
-              "mapper": {
-                "mode": "select",
-                "values": {
-                  "0": "{{7.parameters.date}}",
-                  "1": "{{7.parameters.description}}",
-                  "2": "{{7.parameters.counterparty}}",
-                  "3": "{{7.parameters.category}}",
-                  "4": "{{7.parameters.treatment}}",
-                  "5": "{{7.parameters.amount_gel}}",
-                  "6": "{{7.parameters.currency}}",
-                  "7": "{{7.parameters.amount_original}}",
-                  "8": "{{7.parameters.fx_rate}}",
-                  "9": "{{7.parameters.payment_method}}",
-                  "10": "{{7.parameters.contract}}",
-                  "11": "telegram",
-                  "12": "{{1.message.from.username}}",
-                  "13": "{{formatDate(now; \"YYYY-MM-DD HH:mm\"; \"Asia/Tbilisi\")}}",
-                  "14": "{{7.parameters.confidence}}",
-                  "15": "live",
-                  "16": "{{7.log_message}}"
+              "metadata": {
+                "designer": {
+                  "x": 1350,
+                  "y": 150,
+                  "name": "Model or fallback?"
                 },
-                "sheetId": "<<LEDGER_TAB_NAME>>",
-                "spreadsheetId": "<<LEDGER_SPREADSHEET_ID>>",
-                "includesHeaders": true,
-                "insertDataOption": "INSERT_ROWS",
-                "valueInputOption": "USER_ENTERED",
-                "from": "drive"
-              },
-              "module": "google-sheets:addRow",
-              "version": 2,
+                "notes": "The single decision point. If the model answered, its action is used unchanged. If it did not - no credit, bad JSON, timeout - the deterministic reading decides, and byhand=yes marks the row and the reply so the owner knows to check the category."
+              }
+            },
+            {
+              "id": 21,
+              "module": "builtin:BasicRouter",
+              "version": 1,
+              "mapper": null,
+              "parameters": {},
               "metadata": {
                 "designer": {
-                  "x": 1500,
+                  "x": 1600,
                   "y": 150,
-                  "name": "Append to ledger"
+                  "name": "What did we decide?"
                 }
               },
-              "parameters": {
-                "__IMTCONN__": null
-              }
-            },
-            {
-              "id": 9,
-              "filter": {
-                "name": "Logged",
-                "conditions": [
-                  [
+              "routes": [
+                {
+                  "flow": [
                     {
-                      "a": "{{7.action}}",
-                      "b": "log_expense",
-                      "o": "text:equal"
+                      "id": 8,
+                      "mapper": {
+                        "mode": "select",
+                        "values": {
+                          "0": "{{ifempty(7.parameters.date; formatDate(now; \"YYYY-MM-DD\"; \"Asia/Tbilisi\"))}}",
+                          "1": "{{ifempty(7.parameters.description; 20.desc)}}",
+                          "2": "{{7.parameters.counterparty}}",
+                          "3": "{{ifempty(7.parameters.category; \"other\")}}",
+                          "4": "{{ifempty(7.parameters.treatment; \"CAPEX\")}}",
+                          "5": "{{ifempty(7.parameters.amount_gel; 20.amt)}}",
+                          "6": "{{ifempty(7.parameters.currency; \"GEL\")}}",
+                          "7": "{{ifempty(7.parameters.amount_original; 20.amt)}}",
+                          "8": "{{ifempty(7.parameters.fx_rate; 1)}}",
+                          "9": "{{ifempty(7.parameters.payment_method; \"unknown\")}}",
+                          "10": "{{7.parameters.contract}}",
+                          "11": "{{if(22.byhand = \"yes\"; \"telegram-fallback\"; \"telegram\")}}",
+                          "12": "{{1.message.from.username}}",
+                          "13": "{{formatDate(now; \"YYYY-MM-DD HH:mm\"; \"Asia/Tbilisi\")}}",
+                          "14": "{{ifempty(7.parameters.confidence; 0.5)}}",
+                          "15": "live",
+                          "16": "{{ifempty(7.log_message; \"Read by the no-model fallback: amount taken from the message, category defaulted to other and needs checking.\")}}"
+                        },
+                        "sheetId": "<<LEDGER_TAB_NAME>>",
+                        "spreadsheetId": "<<LEDGER_SPREADSHEET_ID>>",
+                        "includesHeaders": true,
+                        "insertDataOption": "INSERT_ROWS",
+                        "valueInputOption": "USER_ENTERED",
+                        "from": "drive"
+                      },
+                      "module": "google-sheets:addRow",
+                      "version": 2,
+                      "metadata": {
+                        "designer": {
+                          "x": 1500,
+                          "y": 150,
+                          "name": "Append to ledger"
+                        },
+                        "notes": "Every value falls back: the model's field if there is one, the deterministic reading if not. Column L records the channel as telegram-fallback for rows written without the model, so they can be found and re-categorised later. Column P is written 'live', never blank - a blank column P is invisible to Google's range read."
+                      },
+                      "parameters": {
+                        "__IMTCONN__": null
+                      },
+                      "filter": {
+                        "name": "Write it",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{22.mode}}",
+                              "b": "log_expense",
+                              "o": "text:equal"
+                            }
+                          ]
+                        ]
+                      }
+                    },
+                    {
+                      "id": 9,
+                      "mapper": {
+                        "text": "✅ <b>ჩაიწერა / Logged</b>\n\n{{ifempty(7.parameters.description; 20.desc)}}\n<b>{{formatNumber(ifempty(7.parameters.amount_gel; 20.amt); 2; \".\"; \",\")}} ₾</b> · {{ifempty(7.parameters.category; \"other\")}}\n{{7.parameters.counterparty}}\n{{ifempty(7.parameters.date; formatDate(now; \"YYYY-MM-DD\"; \"Asia/Tbilisi\"))}}\n{{if(22.byhand = \"yes\"; \"\n⚠️ მოდელის გარეშე ჩაიწერა — კატეგორია <b>other</b>-ია, ცხრილში შეასწორეთ.\n<i>Logged without the model. The category is a placeholder — fix it in the sheet.</i>\"; \"\")}}\n\n/balance — სად ვართ",
+                        "chatId": "{{1.message.chat.id}}",
+                        "parseMode": "HTML"
+                      },
+                      "module": "telegram:SendReplyMessage",
+                      "version": 1,
+                      "metadata": {
+                        "designer": {
+                          "x": 1800,
+                          "y": 150,
+                          "name": "Reply: logged"
+                        }
+                      },
+                      "parameters": {
+                        "__IMTCONN__": null
+                      }
                     }
                   ]
-                ]
-              },
-              "mapper": {
-                "text": "✅ <b>ჩაიწერა / Logged</b>\n\n{{7.parameters.description}}\n<b>{{formatNumber(7.parameters.amount_gel; 2; \".\"; \",\")}} ₾</b> · {{7.parameters.category}} · {{7.parameters.treatment}}\n{{7.parameters.counterparty}}\n{{7.parameters.date}}\n\n/balance — სად ვართ",
-                "chatId": "{{1.message.chat.id}}",
-                "parseMode": "HTML"
-              },
-              "module": "telegram:SendReplyMessage",
-              "version": 1,
-              "metadata": {
-                "designer": {
-                  "x": 1800,
-                  "y": 150,
-                  "name": "Reply: logged"
-                }
-              },
-              "parameters": {
-                "__IMTCONN__": null
-              }
-            },
-            {
-              "id": 10,
-              "filter": {
-                "name": "Needs a question",
-                "conditions": [
-                  [
+                },
+                {
+                  "flow": [
                     {
-                      "a": "{{7.action}}",
-                      "b": "ask_clarification",
-                      "o": "text:equal"
+                      "id": 11,
+                      "mapper": {
+                        "text": "⚠️ <b>დასადასტურებელია / Confirm</b>\n\n{{ifempty(7.parameters.description; 20.desc)}}\n<b>{{formatNumber(ifempty(7.parameters.amount_gel; 20.amt); 2; \".\"; \",\")}} ₾</b> · {{ifempty(7.parameters.category; \"other\")}}\n{{7.parameters.counterparty}}\n\n10,000 ₾-ზე მეტია. დასადასტურებლად გამიგზავნეთ იგივე ტექსტი სიტყვით <code>დიახ</code>.\n<i>Above the 10,000 confirm threshold. Nothing has been written. Re-send with the word დიახ.</i>",
+                        "chatId": "{{1.message.chat.id}}",
+                        "parseMode": "HTML"
+                      },
+                      "module": "telegram:SendReplyMessage",
+                      "version": 1,
+                      "metadata": {
+                        "designer": {
+                          "x": 1800,
+                          "y": 450,
+                          "name": "Reply: confirm first"
+                        }
+                      },
+                      "parameters": {
+                        "__IMTCONN__": null
+                      },
+                      "filter": {
+                        "name": "Over 10,000",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{22.mode}}",
+                              "b": "confirm_first",
+                              "o": "text:equal"
+                            }
+                          ]
+                        ]
+                      }
                     }
                   ]
-                ]
-              },
-              "mapper": {
-                "text": "❓ {{7.parameters.question_ka}}\n\n<i>{{7.parameters.question_en}}</i>",
-                "chatId": "{{1.message.chat.id}}",
-                "parseMode": "HTML"
-              },
-              "module": "telegram:SendReplyMessage",
-              "version": 1,
-              "metadata": {
-                "designer": {
-                  "x": 1800,
-                  "y": 300,
-                  "name": "Reply: ask"
-                }
-              },
-              "parameters": {
-                "__IMTCONN__": null
-              }
-            },
-            {
-              "id": 11,
-              "filter": {
-                "name": "Large or uncertain",
-                "conditions": [
-                  [
+                },
+                {
+                  "flow": [
                     {
-                      "a": "{{7.action}}",
-                      "b": "confirm_first",
-                      "o": "text:equal"
+                      "id": 10,
+                      "mapper": {
+                        "text": "❓ {{7.parameters.question_ka}}\n\n<i>{{7.parameters.question_en}}</i>",
+                        "chatId": "{{1.message.chat.id}}",
+                        "parseMode": "HTML"
+                      },
+                      "module": "telegram:SendReplyMessage",
+                      "version": 1,
+                      "metadata": {
+                        "designer": {
+                          "x": 1800,
+                          "y": 300,
+                          "name": "Reply: ask"
+                        }
+                      },
+                      "parameters": {
+                        "__IMTCONN__": null
+                      },
+                      "filter": {
+                        "name": "The model asked",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{22.mode}}",
+                              "b": "ask_clarification",
+                              "o": "text:equal"
+                            }
+                          ]
+                        ]
+                      }
                     }
                   ]
-                ]
-              },
-              "mapper": {
-                "text": "⚠️ <b>დასადასტურებელია / Confirm</b>\n\n{{7.parameters.description}}\n<b>{{formatNumber(7.parameters.amount_gel; 2; \".\"; \",\")}} ₾</b> · {{7.parameters.category}}\n{{7.parameters.counterparty}}\n{{7.parameters.date}}\n\nდასადასტურებლად გამიგზავნეთ იგივე სიტყვები დამატებით <code>დიახ</code>",
-                "chatId": "{{1.message.chat.id}}",
-                "parseMode": "HTML"
-              },
-              "module": "telegram:SendReplyMessage",
-              "version": 1,
-              "metadata": {
-                "designer": {
-                  "x": 1800,
-                  "y": 450,
-                  "name": "Reply: confirm first"
+                },
+                {
+                  "flow": [
+                    {
+                      "id": 23,
+                      "module": "telegram:SendReplyMessage",
+                      "version": 1,
+                      "parameters": {
+                        "__IMTCONN__": null
+                      },
+                      "mapper": {
+                        "parseMode": "HTML",
+                        "chatId": "{{1.message.chat.id}}",
+                        "text": "{{if(22.mode = \"ask_amt\"; \"❓ თანხა ვერ ამოვიკითხე.\nდაწერეთ ასე: <code>ბეტონი 250</code>\n\n<i>I could not find an amount in that. Write it as: description then the number.</i>\"; if(22.mode = \"ask_sep\"; \"❓ თანხა გამყოფის გარეშე დაწერეთ: <code>104500</code>, არა <code>104 500</code>.\n\n<i>Write the amount without a space or comma between the thousands — otherwise I would read 104 500 as 104.</i>\"; \"❓ უცხოური ვალუტაა. გამიგზავნეთ ლარის თანხა, ან კურსი.\n\n<i>That is a foreign currency and I have no rate. Send the lari amount, or the rate. Nothing has been written.</i>\"))}}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 1800,
+                          "y": 600,
+                          "name": "Reply: fallback question"
+                        },
+                        "notes": "The three ways the deterministic reading refuses to guess. Every one of them writes nothing."
+                      },
+                      "filter": {
+                        "name": "The fallback asked",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{22.mode}}",
+                              "b": "ask_amt",
+                              "o": "text:equal"
+                            }
+                          ],
+                          [
+                            {
+                              "a": "{{22.mode}}",
+                              "b": "ask_sep",
+                              "o": "text:equal"
+                            }
+                          ],
+                          [
+                            {
+                              "a": "{{22.mode}}",
+                              "b": "ask_fx",
+                              "o": "text:equal"
+                            }
+                          ]
+                        ]
+                      }
+                    }
+                  ]
                 }
-              },
-              "parameters": {
-                "__IMTCONN__": null
-              }
+              ]
             }
           ]
         },
@@ -410,7 +538,8 @@
                   "x": 900,
                   "y": -320,
                   "name": "Read the numbers"
-                }
+                },
+                "notes": "No Claude call on this route on purpose: the arithmetic must keep working when the Anthropic balance is empty."
               }
             },
             {
@@ -430,7 +559,8 @@
                   "x": 1200,
                   "y": -320,
                   "name": "Reply: blocks"
-                }
+                },
+                "notes": "Constants match construction/Block_Calculator.xlsx: 11.6144 blocks per m2 and 0.0141723 m3 of mortar per m2 for a 400x200x200 block on 1 cm joints, 350 kg cement and 1.05 m3 sand per m3 of mortar. If a constant changes in the spreadsheet it must change here in the same commit."
               }
             }
           ]
@@ -533,7 +663,7 @@
               "mapper": {
                 "parseMode": "HTML",
                 "chatId": "{{1.message.chat.id}}",
-                "text": "<b>მუხრანი 2026</b>\n\n<b>/balance</b> — ბიუჯეტი და დახარჯული\n\n<b>/blocks [პერიმეტრი] [სიმაღლე]</b>\nმაგ. <code>/blocks 180 0.8</code> — ბლოკი, ცემენტი, ქვიშა\n\n<b>/foundation [სიგრძე] [სიგანე] [სიღრმე]</b>\nმაგ. <code>/foundation 180 0.4 0.5</code> — ბეტონი, ცემენტი, ქვიშა, ღორღი, არმატურა\n\nხარჯის ჩასაწერად უბრალოდ დაწერეთ:\n<code>ბეტონი 250 ლარი</code>\n\n<i>Numbers are optional — leave them out and the defaults are used.</i>"
+                "text": "<b>მუხრანი 2026</b>\n\n<b>/balance</b> — ბიუჯეტი და დახარჯული\n\n<b>/blocks [პერიმეტრი] [სიმაღლე]</b>\nმაგ. <code>/blocks 180 0.8</code> — ბლოკი, ცემენტი, ქვიშა\n\n<b>/foundation [სიგრძე] [სიგანე] [სიღრმე]</b>\nმაგ. <code>/foundation 180 0.4 0.5</code> — ბეტონი, ცემენტი, ქვიშა, ღორღი, არმატურა\n\nხარჯის ჩასაწერად უბრალოდ დაწერეთ:\n<code>ბეტონი 250 ლარი</code>\nთანხა გამყოფის გარეშე: <code>104500</code>, არა <code>104 500</code>.\n\n<i>The expense line works with or without the model. Write the amount without thousands separators.</i>"
               },
               "metadata": {
                 "designer": {
@@ -575,14 +705,18 @@
     },
     "notes": [
       "Replace four placeholders before the first run: <<OWNER_CHAT_ID>> (module 2), <<LEDGER_SPREADSHEET_ID>> and <<LEDGER_TAB_NAME>> (modules 4 and 8), and the system prompt in module 6.",
-      "Five router routes: /balance reads the ledger; anything not starting with / goes to Claude; /blocks and /foundation are pure Make arithmetic; /help and /start print the command list.",
-      "The calculator routes deliberately make NO model call. Their constants are copied from construction/Block_Calculator.xlsx and construction/Foundation_Calculator.xlsx, so the bot and the spreadsheets always give the same number - change one and change the other in the same commit. The foundation cement figure counts the blinding layer as well as the footing; leaving it out answered 242 bags where the sheet said 257.",
-      "Module 6 carries an onerror chain ending in builtin:Ignore. This is not decoration: on 17, 18 and 21 September an Anthropic failure on that module made Make mark the whole scenario isinvalid and switch it off, taking /balance and the calculators down with it. Ignore keeps a model failure to the one bundle that caused it, and the owner is told in plain words instead of meeting silence.",
-      "Module identifiers verified against the Make API on 17 and 21 Sep 2026: anthropic-claude:createAMessage (NOT createMessage), google-sheets:addRow/filterRows v2, telegram:SendReplyMessage v1, util:SetVariable2 for one variable and util:SetVariables for several, builtin:Ignore v1.",
+      "Five router routes: /balance reads the ledger; anything not starting with / is an expense; /blocks and /foundation are pure Make arithmetic; /help and /start print the command list.",
+      "THE EXPENSE PATH HAS TWO READERS. Module 20 reads the message by pattern match before the model is called and never fails. Module 6 calls Claude. Module 22 picks: the model's answer if there is one, the pattern match if there is not. So an expense is still recorded when the Anthropic balance is empty, the key is rejected or the model breaks the JSON contract.",
+      "Modules 6 and 7 use builtin:Resume, NOT builtin:Ignore. Ignore drops the bundle, which would skip the write; Resume carries on with an empty output so module 22 can fall back. This matters: an Anthropic failure disabled the whole scenario on 17, 18 and 21 September, because Make flags a scenario isinvalid when a module keeps failing at run time and then activation silently does nothing.",
+      "The fallback refuses to guess in three cases and writes nothing in any of them: no digits in the message, a thousands separator (104 500 would be read as 104), or a foreign currency with no rate. Each gets its own question back.",
+      "A row written without the model carries channel 'telegram-fallback' in column L, category 'other', confidence 0.5, and a note in column Q. Those rows need their category set by hand - the reply says so at the time.",
+      "The 10,000 GEL confirm gate applies to the fallback too: module 22 routes anything at or above it to confirm_first, so a large payment is never written without a second message.",
+      "The calculator routes deliberately make NO model call. Their constants are copied from construction/Block_Calculator.xlsx and construction/Foundation_Calculator.xlsx - change one and change the other in the same commit. The foundation cement figure counts the blinding layer as well as the footing; leaving it out answered 242 bags where the sheet said 257.",
+      "Module identifiers verified against the Make API on 17 and 21 Sep 2026: anthropic-claude:createAMessage (NOT createMessage), google-sheets:addRow/filterRows v2, telegram:SendReplyMessage v1, util:SetVariable2 for one variable and util:SetVariables for several, builtin:Resume and builtin:BasicRouter v1.",
       "Module configuration verified with validate_module_configuration. Three things Make rejects silently: a bare 'ne' filter operator, a 'mode' field on filterRows, and a messages[] entry without inputType. Any of them leaves the scenario isinvalid and un-activatable, with no error shown until you try to switch it on.",
       "Make's expression argument separator is a semicolon everywhere: formatNumber(n; 2; \".\"; \",\"). A comma between the last two arguments looks right and formats wrongly.",
+      "A filter stops the whole branch it sits on, so mutually exclusive outcomes need a router, not a sequence of filtered modules. That is why module 21 exists.",
       "Google Sheets returns an empty range for a column that is blank in every row. Filtering on such a column yields zero rows with no error at all, so /balance answers 0 instead of failing. Filter on a column that is always populated - here column A.",
-      "The /balance route filters on the literal '/balance', not on '/', so a calculator command never touches the sheet.",
       "No WebhookRespond module: it is unsupported alongside sequential processing, and Make returns 200 by itself. sequential stays on so two quick messages cannot race into the same sheet row."
     ]
   }

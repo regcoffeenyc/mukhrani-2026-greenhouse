@@ -1,7 +1,11 @@
 # Setup — from nothing to a working bot
 
-Eight steps. Everything that needs a password or a tap is yours; everything else
+Ten steps. Everything that needs a password or a tap is yours; everything else
 is in this repo. Budget about an hour.
+
+The bot is **running**. Steps 1–6 are the record of how it was built; steps 7–10
+are how to test it and what it does. Only step 5c is still open, and the bot
+works without it.
 
 ---
 
@@ -47,8 +51,8 @@ Do not reorder the columns — the bot writes by position, not by header.
 
 ## 4. The scenario — already built
 
-It exists in Make, **switched off**, with the Anthropic and Google connections
-already attached and the ledger id and system prompt already filled in:
+It exists in Make and is **switched on**, with the Anthropic and Google
+connections attached and the ledger id and system prompt filled in:
 
 | | |
 |---|---|
@@ -95,16 +99,22 @@ modules in total.
 **b. ~~Fill in the owner gate~~ — done.** Module 2 carries `8831217917`, the
 Telegram id of @geotacticalmarket. Every other chat stops there.
 
-**c. Fix the Anthropic connection — STILL OPEN.** Connection
-`GTM Anthropic (agent brain)` (id `10254078`) holds an API key that Anthropic
-now rejects with `401 API key is invalid`. Make cannot fetch the model list for
-module 6, so it marks the module unconfigured, the scenario carries
-`isinvalid: true`, and **it silently refuses to switch on** — the API reports
-"activated" and the scenario stays off.
+**c. Put credit on the Anthropic account — STILL OPEN, but no longer blocking.**
+Connection `GTM Anthropic (agent brain)` (id `10254078`) is attached and its key
+is valid. The account behind it has no credit: every call returns
+`[400] Your credit balance is too low to access the Anthropic API`. That killed
+the whole scenario on 17, 18 and 21 September, which is what section 8 is about.
 
-Make → **Connections** → `GTM Anthropic (agent brain)` → **Edit** → paste a
-valid key from console.anthropic.com. Eight other scenarios share this
-connection, so they are broken too until it is fixed.
+Since 21 September it no longer stops anything — expenses are still recorded,
+without a category. Top up at console.anthropic.com → **Plans & Billing** and
+the categories come back on their own; nothing in Make needs touching.
+
+Note that this is the **shop's** Anthropic account, shared with eight other
+scenarios. Separating it is `docs/03-separation.md`.
+
+*(An earlier problem on this connection — `401 API key is invalid` on
+17 September — was fixed by re-entering the key. If you see a 401 rather than a
+400, that is the fix: Make → **Connections** → **Edit** → paste a valid key.)*
 
 ## 6. Point Telegram at Make
 
@@ -118,10 +128,12 @@ You should see `{"ok":true,"result":true,"description":"Webhook was set"}`.
 
 The scenario is already **ON**.
 
-**A note on the plan's active-scenario cap.** Make allows two active scenarios on
-this plan, and both slots were taken (*GTM — Order intake* and *GTM — Facebook
-post*). *GTM — Facebook post* was paused on 17 September 2026 to make room for
-this one. If you want it back, either pause the expense bot or raise the plan.
+**A note on the plan's active-scenario cap.** The cap was two when this was
+built, and both slots were taken, so *GTM — Facebook post* was paused on
+17 September 2026 to make room. The cap is no longer binding — eleven scenarios
+are active — but *GTM — Facebook post* stays off because the owner said on
+19 September to leave it off. That is a shop decision, not leftover from this
+project: do not switch it back on.
 
 ## 7. Test it — in this order
 
@@ -133,7 +145,8 @@ this one. If you want it back, either pause the expense bot or raise the plan.
 | `/foundation 180 0.4 0.5` | 37.8 m³ concrete · 257 bags · 1,133 kg rebar |
 | `ბეტონი 250 ლარი` | ✅ logged, materials, CAPEX — check the row landed in the sheet |
 | `ჯიესენს გადავუხადე 20000 დოლარი` | ❓ a question about the exchange rate, and **no** new row |
-| `ჯიესენ გრუპს ავანსი 35000 ლარი` | ⚠️ confirm buttons, and **no** row until you tap |
+| `ჯიესენ გრუპს ავანსი 35000 ლარი` | ⚠️ asked to confirm, and **no** row until you re-send |
+| `104 500 ცემენტი` | ❓ told to write the amount without a separator, and **no** row |
 | From a different Telegram account | nothing at all — no reply, no row |
 
 The two calculator lines must match `construction/Block_Calculator.xlsx` and
@@ -145,7 +158,41 @@ module 2 is wrong and you must fix it before using the bot for real.
 
 Delete the `ბეტონი 250 ლარი` test row from the sheet afterwards.
 
-## 8. The calculators
+## 8. What happens when the model is not available
+
+The expense line has two readers, and the second one does not need Anthropic.
+
+**Module 20** reads the message by pattern match, before the model is called,
+and cannot fail: it pulls out the first number as the amount, takes what is left
+as the description, and sets two safety flags. **Module 6** calls Claude as
+before. **Module 22** then picks: the model's answer if there is one, the
+pattern match if there is not.
+
+That is why modules 6 and 7 use `builtin:Resume` and not `builtin:Ignore`.
+Ignore drops the message; Resume carries on with an empty output so module 22
+can fall back. The practical result: an empty Anthropic balance, a rejected key
+or a broken JSON reply now costs you the *category*, not the *expense*.
+
+**What the fallback will not do.** It refuses to guess, and writes nothing, in
+three cases:
+
+| The message | What comes back |
+|---|---|
+| no digits at all | write it as description then number |
+| a thousands separator — `104 500`, `104,500` | write `104500`; otherwise it would read `104` |
+| a foreign currency with no rate — `$`, `დოლარი`, `euro` | send the lari amount, or the rate |
+
+The 10,000 GEL confirm gate still applies. A fallback reading at or above it is
+returned for confirmation, exactly as the model's would be.
+
+**Rows written this way need a category.** The fallback cannot classify, so it
+writes `other`, confidence `0.5`, channel `telegram-fallback` in column L, and a
+note in column Q — and the reply tells you at the time. To find them all later,
+filter column L for `telegram-fallback` and set the category by hand before the
+month is closed. That column is the only reason those rows are findable, so do
+not remove it.
+
+## 9. The calculators
 
 The bot answers three commands with no model call at all:
 
@@ -185,7 +232,7 @@ other than a quick number on site, open the spreadsheet.
 The foundation figures are a take-off, not a design. The section and the
 reinforcement come from GSN Group's drawings; the reply says so every time.
 
-## 9. Wire the confirm buttons (optional, later)
+## 10. Wire the confirm buttons (optional, later)
 
 Out of the box, a confirmation shows buttons but the tap does nothing — you
 re-send the expense with the word `დიახ` and it goes through. To make the buttons
@@ -215,7 +262,7 @@ path is safe, just slower.
 | Telegram repeats an update | Make did not return 200 — check the scenario is active and not erroring |
 | Bot silent, Make shows no runs at all | The webhook has API key authentication on, or `setWebhook` points at a different hook |
 | Cannot switch the scenario on | Either the plan's active-scenario slots are full, or the scenario is flagged `isinvalid` — see below |
-| Bot answers `/balance` and the calculators but not free text | The Anthropic balance is empty. The reply says so. Top up at console.anthropic.com → Plans & Billing; nothing else needs touching |
+| Expenses log but the category is always `other` | The model is not answering — almost always an empty Anthropic balance. The row is still recorded; see section 8. Top up at console.anthropic.com → Plans & Billing |
 | `Unable to parse range: '<name>'!P2:...` | `sheetId` in module 4 or 8 does not match the tab name character for character |
 | `/balance` answers 0 records when the sheet has rows | The read filter points at a column that is blank in every row — see below |
 

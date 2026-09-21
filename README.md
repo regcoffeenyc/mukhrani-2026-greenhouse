@@ -70,7 +70,18 @@ what to order before it is spent.
 | ჩვეულებრივი ტექსტი / plain text | ხარჯი იწერება ლეჯერში / the expense is parsed and logged |
 
 ციფრები არასავალდებულოა — უმათოდ პროექტის საკუთარი ზომები გამოიყენება.
+თანხა გამყოფის გარეშე დაწერეთ: `104500`, არა `104 500`.
+
 The numbers are optional; without them the project's own dimensions are used.
+Write amounts without thousands separators.
+
+მხოლოდ კატეგორიას სჭირდება მოდელი. თუ Anthropic-ის ბალანსი ცარიელია, ხარჯი
+მაინც ჩაიწერება — კატეგორიით `other`, რომელიც ხელით უნდა შესწორდეს.
+
+Only the *category* needs the model. If the Anthropic balance is empty the
+expense is still recorded, with category `other` and channel `telegram-fallback`
+so those rows can be found and classified later. Nothing is ever written that
+the bot could not read with confidence — see `docs/02-setup.md` §8.
 
 ## დაწყება / Getting started
 
