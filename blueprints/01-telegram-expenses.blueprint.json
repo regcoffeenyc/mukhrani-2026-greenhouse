@@ -91,7 +91,7 @@
               "module": "google-sheets:filterRows",
               "version": 2,
               "metadata": {
-                "notes": "Filter on column A (date), which every row has. Do NOT filter on column P: Google returns an empty range for an all-blank column, so the filter matched nothing and /balance answered 0 records against a real ledger. sheetId is the TAB name - it is literally 'Untitled'.",
+                "notes": "Filter on column A (date), which every row has. Do NOT filter on column P: Google returns an empty range for an all-blank column, so the filter matched nothing and /balance answered 0 records against a real ledger. sheetId is the TAB name, not the file name; check it in the Sheet Name dropdown rather than assuming.",
                 "designer": {
                   "x": 900,
                   "y": -150,
