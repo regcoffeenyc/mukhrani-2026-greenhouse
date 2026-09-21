@@ -160,7 +160,7 @@
                   },
                   {
                     "name": "desc",
-                    "value": "{{trim(replace(replace(replace(2.msg; \"/[0-9]+([.,][0-9]+)?/g\"; \" \"); \"/(ლარად|ლარის|ლარს|ლარი|ლარ|₾|gel|lari)/gi\"; \" \"); \"/ +/g\"; \" \"))}}"
+                    "value": "{{trim(replace(replace(replace(replace(replace(replace(replace(replace(2.msg; \"/[0-9]+([.,][0-9]+)?/g\"; \" \"); \"ლარად\"; \" \"); \"ლარის\"; \" \"); \"ლარს\"; \" \"); \"ლარი\"; \" \"); \"₾\"; \" \"); \"/(gel|lari)/gi\"; \" \"); \"/ +/g\"; \" \"))}}"
                   }
                 ]
               },
@@ -170,7 +170,7 @@
                   "y": 150,
                   "name": "Read it without a model"
                 },
-                "notes": "Runs BEFORE the model and never fails: amount, description and two safety flags, by pattern match alone. risky catches a thousands separator (104 500 or 104,500) which would otherwise be read as 104; fx catches a foreign currency, which cannot be converted without a rate. Either one sends the message back as a question instead of writing a row."
+                "notes": "Runs BEFORE the model and never fails: amount, description and two safety flags, by pattern match alone. risky catches a thousands separator (104 500 or 104,500) which would otherwise be read as 104; fx catches a foreign currency, which cannot be converted without a rate. Either one sends the message back as a question instead of writing a row. The currency words are stripped by PLAIN STRING replace, longest form first, not by regex: a Unicode character class with an /i flag silently did nothing here on 21 September and left 'lari' in every description. Longest first matters - replacing the short form before the long one would leave a stray letter behind."
               }
             },
             {
