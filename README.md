@@ -56,7 +56,7 @@ can be checked on site without opening a spreadsheet. The constants are shared
 between the two by hand: change one, change the other in the same commit.
 
 The model is the plan; the agent keeps the plan honest by recording what is
-actually spent, in the seven categories the model reads; the calculators say
+actually spent, in the nine categories the model reads; the calculators say
 what to order before it is spent.
 
 ## ბოტის ბრძანებები / Bot commands

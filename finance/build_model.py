@@ -846,6 +846,8 @@ CAT_TAX = "გადასახადები / Taxes & pension"
 CAT_SVC = "მომსახურება / Services"
 CAT_MAT = "მასალები / Materials"
 CAT_INV = "მომწოდებლის ინვოისი / Supplier invoice"
+CAT_FUEL = "საწვავი / Fuel"
+CAT_FOOD = "მუშების კვება / Worker meals"
 CAT_OTH = "სხვა / Other"
 
 txns = [
@@ -883,7 +885,7 @@ txns = [
     # --- მფლობელის მონაცემი, 21/09/2026 / reported by the owner, 21 September ---
     (date(2026, 9, 19), "ავანსი ხელშეკრულება N1 (40 000 აშშ დოლარი, ერ.კ. 2.6125)",
      "შპს ჯიესენ გრუპ", CAT_BUILD, -104500.00),
-    (date(2026, 9, 21), "მუშების კვება — საქვეანგარიშოდ დირექტორზე", "გოდერძი მეტრეველი", CAT_SVC, -10000.00),
+    (date(2026, 9, 21), "მუშების კვება — საქვეანგარიშოდ დირექტორზე", "გოდერძი მეტრეველი", CAT_FOOD, -10000.00),
 ]
 TR0 = 13
 for i, (d, desc, cp, cat, amt) in enumerate(txns):
@@ -900,7 +902,8 @@ for col in "BCD":
     put(ac, f"{col}{RTOT}", "", TXT, fill=FILL_TOT, border=BOX)
 put(ac, f"E{RTOT}", f"=SUM(E{TR0}:E{TREND})", BOLD, fmt=GEL2, fill=FILL_TOT, border=BOX, align="right")
 
-CATS_A = [CAT_BUILD, CAT_PAY, CAT_TAX, CAT_SVC, CAT_MAT, CAT_INV, CAT_OTH]
+CATS_A = [CAT_BUILD, CAT_PAY, CAT_TAX, CAT_SVC, CAT_FUEL, CAT_FOOD,
+          CAT_MAT, CAT_INV, CAT_OTH]
 CS = RTOT + 2
 section(ac, CS, "კატეგორიების მიხედვით / BY CATEGORY", "E")
 put(ac, f"A{CS+1}", "კატეგორია / Category", H1, fill=FILL_H)
@@ -1001,7 +1004,8 @@ for col, h in zip("ABCDEF", ["კატეგორია / Category", "და�
 
 # The source rows live on Actuals and move whenever a payment is added, so they
 # are computed from the same variables that laid that sheet out — never typed in.
-# CATS_A fixes the order: BUILD, PAY, TAX, SVC, MAT, INV, OTH.
+# CATS_A fixes the order; A_CAT_ROW follows it, so a category may be added
+# without touching a single row number here.
 A_CAT_ROW = {cat: CS + 2 + i for i, cat in enumerate(CATS_A)}
 A_MONTH_ROW = [MS + 2 + i for i in range(3)]
 
@@ -1010,92 +1014,102 @@ bcats = [
     ("ხელფასი / Salaries", A_CAT_ROW[CAT_PAY], "OPEX"),
     ("გადასახადები / Taxes & pension", A_CAT_ROW[CAT_TAX], "OPEX"),
     ("მომსახურება / Services", A_CAT_ROW[CAT_SVC], "OPEX"),
+    ("საწვავი / Fuel", A_CAT_ROW[CAT_FUEL], "OPEX"),
+    ("მუშების კვება / Worker meals", A_CAT_ROW[CAT_FOOD], "OPEX"),
     ("მასალები / Materials", A_CAT_ROW[CAT_MAT], "CAPEX"),
     ("მომწოდებლის ინვოისი / Supplier invoice", A_CAT_ROW[CAT_INV], "CAPEX"),
     ("სხვა / Other", A_CAT_ROW[CAT_OTH], "CAPEX"),
 ]
+# Every row number below this block is derived from BR0 and the length of
+# bcats. Adding a category used to mean editing twenty literals by hand and
+# silently breaking the checks if one was missed.
 BR0 = 14
+BEND = BR0 + len(bcats) - 1        # last category row
+BTOT = BEND + 1                    # "total spent"
+DS = BTOT + 2                      # drawdown section
+NS = BTOT + 9                      # contract N1 section
+XS = BTOT + 16                     # capex/opex section
 for i, (lab, src, treat) in enumerate(bcats):
     r = BR0 + i
     put(bg, f"A{r}", lab, TXT, border=BOX)
     put(bg, f"B{r}", f"=Actuals!B{src}", LNK, fmt=GEL2, border=BOX, align="right")
-    put(bg, f"C{r}", f"=IFERROR(B{r}/$B$21,0)", TXT, fmt=PCT, border=BOX, align="right")
+    put(bg, f"C{r}", f"=IFERROR(B{r}/$B${BTOT},0)", TXT, fmt=PCT, border=BOX, align="right")
     put(bg, f"D{r}", treat, INP, border=BOX, align="center")
     c = put(bg, f"E{r}", None, INPB, fmt=GEL, border=BOX, align="right")
     c.fill = FILL_KEY
     put(bg, f"F{r}", f'=IF(E{r}="","",E{r}-B{r})', TXT, fmt=GEL, border=BOX, align="right")
-put(bg, "A21", "სულ დახარჯული / TOTAL SPENT", BOLD, fill=FILL_TOT, border=BOX)
-put(bg, "B21", f"=SUM(B{BR0}:B20)", BOLD, fmt=GEL2, fill=FILL_TOT, border=BOX, align="right")
-put(bg, "C21", "=IFERROR(B21/B21,0)", BOLD, fmt=PCT, fill=FILL_TOT, border=BOX, align="right")
-put(bg, "D21", "", TXT, fill=FILL_TOT, border=BOX)
-put(bg, "E21", f"=IF(COUNT(E{BR0}:E20)=0,\"\",SUM(E{BR0}:E20))", BOLD, fmt=GEL, fill=FILL_TOT, border=BOX, align="right")
-put(bg, "F21", '=IF(E21="","",E21-B21)', BOLD, fmt=GEL, fill=FILL_TOT, border=BOX, align="right")
-put(bg, "G14", "ყვითელი სვეტი ცარიელია — შეავსეთ, თუ კატეგორიებად გეგმა გაქვთ. / "
+put(bg, f"A{BTOT}", "სულ დახარჯული / TOTAL SPENT", BOLD, fill=FILL_TOT, border=BOX)
+put(bg, f"B{BTOT}", f"=SUM(B{BR0}:B{BEND})", BOLD, fmt=GEL2, fill=FILL_TOT, border=BOX, align="right")
+put(bg, f"C{BTOT}", f"=IFERROR(B{BTOT}/B{BTOT},0)", BOLD, fmt=PCT, fill=FILL_TOT, border=BOX, align="right")
+put(bg, f"D{BTOT}", "", TXT, fill=FILL_TOT, border=BOX)
+put(bg, f"E{BTOT}", f"=IF(COUNT(E{BR0}:E{BEND})=0,\"\",SUM(E{BR0}:E{BEND}))", BOLD, fmt=GEL, fill=FILL_TOT, border=BOX, align="right")
+put(bg, f"F{BTOT}", f'=IF(E{BTOT}="","",E{BTOT}-B{BTOT})', BOLD, fmt=GEL, fill=FILL_TOT, border=BOX, align="right")
+put(bg, f"G{BR0}", "ყვითელი სვეტი ცარიელია — შეავსეთ, თუ კატეგორიებად გეგმა გაქვთ. / "
                "The yellow column is empty — fill it in if you have a plan per category.", NOTE)
 
 # ---------------- 3. drawdown by month ----------------
-section(bg, 23, "3. ბიუჯეტის ნაშთი თვეების მიხედვით / BUDGET DRAWDOWN BY MONTH", "F")
+section(bg, DS, "3. ბიუჯეტის ნაშთი თვეების მიხედვით / BUDGET DRAWDOWN BY MONTH", "F")
 for col, h in zip("ABCD", ["თვე / Month", "ხარჯი / Spend", "კუმულატიური / Cumulative",
                            "ბიუჯეტის ნაშთი / Budget left"]):
-    put(bg, f"{col}24", h, H1, fill=FILL_H, align="center")
+    put(bg, f"{col}{DS+1}", h, H1, fill=FILL_H, align="center")
 for i, (lab, src) in enumerate([("ივლისი 2026 / July", A_MONTH_ROW[0]),
                                 ("აგვისტო 2026 / August", A_MONTH_ROW[1]),
                                 ("სექტემბერი 2026 (21-მდე) / September (to the 21st)", A_MONTH_ROW[2])]):
-    r = 25 + i
+    r = DS + 2 + i
     put(bg, f"A{r}", lab, TXT, border=BOX)
     put(bg, f"B{r}", f"=Actuals!B{src}", LNK, fmt=GEL2, border=BOX, align="right")
-    put(bg, f"C{r}", f"=SUM($B$25:B{r})", TXT, fmt=GEL2, border=BOX, align="right")
+    put(bg, f"C{r}", f"=SUM($B${DS+2}:B{r})", TXT, fmt=GEL2, border=BOX, align="right")
     put(bg, f"D{r}", f"=$B$6-C{r}", BOLD, fmt=GEL, border=BOX, align="right")
-put(bg, "A28", "სულ / TOTAL", BOLD, fill=FILL_TOT, border=BOX)
-put(bg, "B28", "=SUM(B25:B27)", BOLD, fmt=GEL2, fill=FILL_TOT, border=BOX, align="right")
-put(bg, "C28", "=B28-B21", BOLD, fmt=GEL2, fill=FILL_TOT, border=BOX, align="right")
-put(bg, "D28", "=$B$6-B28", BOLD, fmt=GEL, fill=FILL_TOT, border=BOX, align="right")
-put(bg, "G28", "C28 შემოწმებაა — უნდა იყოს 0 / C28 is a check — it must read 0", NOTE)
+put(bg, f"A{DS+5}", "სულ / TOTAL", BOLD, fill=FILL_TOT, border=BOX)
+put(bg, f"B{DS+5}", f"=SUM(B{DS+2}:B{DS+4})", BOLD, fmt=GEL2, fill=FILL_TOT, border=BOX, align="right")
+put(bg, f"C{DS+5}", f"=B{DS+5}-B{BTOT}", BOLD, fmt=GEL2, fill=FILL_TOT, border=BOX, align="right")
+put(bg, f"D{DS+5}", f"=$B$6-B{DS+5}", BOLD, fmt=GEL, fill=FILL_TOT, border=BOX, align="right")
+put(bg, f"G{DS+5}", f"C{DS+5} შემოწმებაა — უნდა იყოს 0 / C{DS+5} is a check — it must read 0", NOTE)
 
 # ---------------- 4. contract N1 ----------------
-section(bg, 30, "4. ხელშეკრულება N1 — შპს ჯიესენ გრუპი / CONTRACT N1 — LLC GSN GROUP", "F")
+section(bg, NS, "4. ხელშეკრულება N1 — შპს ჯიესენ გრუპი / CONTRACT N1 — LLC GSN GROUP", "F")
 for col, h in zip("ABCD", ["მუხლი / Item", "USD", "კურსი / Rate", "GEL"]):
-    put(bg, f"{col}31", h, H1, fill=FILL_H, align="center")
-put(bg, "A32", "ჯამური ღირებულება / Total contract value", BOLD, border=BOX)
-c = put(bg, "B32", 125000, INPB, fmt='#,##0', border=BOX, align="right")
+    put(bg, f"{col}{NS+1}", h, H1, fill=FILL_H, align="center")
+put(bg, f"A{NS+2}", "ჯამური ღირებულება / Total contract value", BOLD, border=BOX)
+c = put(bg, f"B{NS+2}", 125000, INPB, fmt='#,##0', border=BOX, align="right")
 c.fill = FILL_KEY
-put(bg, "C32", "=Assumptions!$B$28", LNK, fmt='0.0000', border=BOX, align="right")
-put(bg, "D32", "=B32*Assumptions!$B$28", BOLD, fmt=GEL, border=BOX, align="right")
-put(bg, "G32", "მფლობელის მონაცემი / given by the owner", NOTE)
-put(bg, "A33", "გადახდილი ავანსი / Advances paid", TXT, border=BOX)
+put(bg, f"C{NS+2}", "=Assumptions!$B$28", LNK, fmt='0.0000', border=BOX, align="right")
+put(bg, f"D{NS+2}", f"=B{NS+2}*Assumptions!$B$28", BOLD, fmt=GEL, border=BOX, align="right")
+put(bg, f"G{NS+2}", "მფლობელის მონაცემი / given by the owner", NOTE)
+put(bg, f"A{NS+3}", "გადახდილი ავანსი / Advances paid", TXT, border=BOX)
 # The September advance was paid in lari against a contract priced in dollars.
 # It is converted at the contract's own reference rate, so the GEL outstanding
 # on row 34 falls by exactly the 2,900 GEL paid.
-put(bg, "B33", "=22000+5000+40000+2900/Assumptions!$B$28", TXT, fmt='#,##0', border=BOX, align="right")
-put(bg, "C33", "=IFERROR(D33/B33,0)", TXT, fmt='0.0000', border=BOX, align="right")
-put(bg, "D33", f"=Actuals!B{A_CAT_ROW[CAT_BUILD]}", LNK, fmt=GEL2, border=BOX, align="right")
-put(bg, "G33", "09/07 — 22,000 $ · 04/08 — 5,000 $ · 14/09 — 2,900 ₾ ≈ 1,099 $ (ერ.კ. 2.6384) · 19/09 — 40,000 $ ერ.კ. 2.6125", NOTE)
-put(bg, "A34", "დარჩენილი გადასახდელი / Outstanding", BOLD, fill=FILL_TOT, border=BOX)
-put(bg, "B34", "=B32-B33", BOLD, fmt='#,##0', fill=FILL_TOT, border=BOX, align="right")
-put(bg, "C34", "=Assumptions!$B$28", LNK, fmt='0.0000', fill=FILL_TOT, border=BOX, align="right")
-put(bg, "D34", "=B34*Assumptions!$B$28", BOLD, fmt=GEL, fill=FILL_TOT, border=BOX, align="right")
-put(bg, "A35", "შესრულების წილი / Share of the contract paid", BOLD, border=BOX)
-put(bg, "B35", "=IFERROR(B33/B32,0)", BOLD, fmt=PCT, border=BOX, align="right")
+put(bg, f"B{NS+3}", "=22000+5000+40000+2900/Assumptions!$B$28", TXT, fmt='#,##0', border=BOX, align="right")
+put(bg, f"C{NS+3}", f"=IFERROR(D{NS+3}/B{NS+3},0)", TXT, fmt='0.0000', border=BOX, align="right")
+put(bg, f"D{NS+3}", f"=Actuals!B{A_CAT_ROW[CAT_BUILD]}", LNK, fmt=GEL2, border=BOX, align="right")
+put(bg, f"G{NS+3}", "09/07 — 22,000 $ · 04/08 — 5,000 $ · 14/09 — 2,900 ₾ ≈ 1,099 $ (ერ.კ. 2.6384) · 19/09 — 40,000 $ ერ.კ. 2.6125", NOTE)
+put(bg, f"A{NS+4}", "დარჩენილი გადასახდელი / Outstanding", BOLD, fill=FILL_TOT, border=BOX)
+put(bg, f"B{NS+4}", f"=B{NS+2}-B{NS+3}", BOLD, fmt='#,##0', fill=FILL_TOT, border=BOX, align="right")
+put(bg, f"C{NS+4}", "=Assumptions!$B$28", LNK, fmt='0.0000', fill=FILL_TOT, border=BOX, align="right")
+put(bg, f"D{NS+4}", f"=B{NS+4}*Assumptions!$B$28", BOLD, fmt=GEL, fill=FILL_TOT, border=BOX, align="right")
+put(bg, f"A{NS+5}", "შესრულების წილი / Share of the contract paid", BOLD, border=BOX)
+put(bg, f"B{NS+5}", f"=IFERROR(B{NS+3}/B{NS+2},0)", BOLD, fmt=PCT, border=BOX, align="right")
 
 # ---------------- 5. capital vs operating ----------------
-section(bg, 37, "5. კაპიტალური თუ საოპერაციო / CAPITAL OR OPERATING", "F")
-put(bg, "A38", "კაპიტალიზებული / Capitalised (CAPEX)", BOLD, border=BOX)
-put(bg, "B38", f'=SUMIF($D${BR0}:$D$20,"CAPEX",$B${BR0}:$B$20)', BOLD, fmt=GEL2, border=BOX, align="right")
-put(bg, "C38", "=IFERROR(B38/$B$21,0)", BOLD, fmt=PCT, border=BOX, align="right")
-put(bg, "G38", "სათბურის ღირებულებაში / into the cost of the greenhouse", NOTE)
-put(bg, "A39", "პრე-საოპერაციო ხარჯი / Pre-operating running costs", BOLD, border=BOX)
-put(bg, "B39", f'=SUMIF($D${BR0}:$D$20,"OPEX",$B${BR0}:$B$20)', BOLD, fmt=GEL2, border=BOX, align="right")
-put(bg, "C39", "=IFERROR(B39/$B$21,0)", BOLD, fmt=PCT, border=BOX, align="right")
-put(bg, "G39", "ხელფასი, გადასახადები, მომსახურება მოსავლამდე / wages, taxes and services before the first crop", NOTE)
-put(bg, "A40", "შემოწმება / Check (must be 0)", BOLD, border=BOX)
-put(bg, "B40", "=B38+B39-B21", INPB, fmt=GEL2, border=BOX, align="right")
+section(bg, XS, "5. კაპიტალური თუ საოპერაციო / CAPITAL OR OPERATING", "F")
+put(bg, f"A{XS+1}", "კაპიტალიზებული / Capitalised (CAPEX)", BOLD, border=BOX)
+put(bg, f"B{XS+1}", f'=SUMIF($D${BR0}:$D${BEND},"CAPEX",$B${BR0}:$B${BEND})', BOLD, fmt=GEL2, border=BOX, align="right")
+put(bg, f"C{XS+1}", f"=IFERROR(B{XS+1}/$B${BTOT},0)", BOLD, fmt=PCT, border=BOX, align="right")
+put(bg, f"G{XS+1}", "სათბურის ღირებულებაში / into the cost of the greenhouse", NOTE)
+put(bg, f"A{XS+2}", "პრე-საოპერაციო ხარჯი / Pre-operating running costs", BOLD, border=BOX)
+put(bg, f"B{XS+2}", f'=SUMIF($D${BR0}:$D${BEND},"OPEX",$B${BR0}:$B${BEND})', BOLD, fmt=GEL2, border=BOX, align="right")
+put(bg, f"C{XS+2}", f"=IFERROR(B{XS+2}/$B${BTOT},0)", BOLD, fmt=PCT, border=BOX, align="right")
+put(bg, f"G{XS+2}", "ხელფასი, გადასახადები, მომსახურება მოსავლამდე / wages, taxes and services before the first crop", NOTE)
+put(bg, f"A{XS+3}", "შემოწმება / Check (must be 0)", BOLD, border=BOX)
+put(bg, f"B{XS+3}", f"=B{XS+1}+B{XS+2}-B{BTOT}", INPB, fmt=GEL2, border=BOX, align="right")
 
-put(bg, "A42", "· ბიუჯეტი კრედიტის თანხაა (Assumptions!B27). ხარჯი — ბანკის ამონაწერიდან, ცვლილება Actuals-ზე ხდება.", TXT)
-put(bg, "A43", "· კრედიტი ტრანშებად გაიცემა, ამიტომ ამონაწერში ერთიანი ჩარიცხვა არ ჩანს.", TXT)
-put(bg, "A44", "· ეს ფურცელი მშენებლობის ფაზაა; CF_Monthly და Annual პირველ სრულ საოპერაციო წელს ასახავს.", TXT)
-put(bg, "A45", "· The budget is the credit amount; the spend comes from the bank statement — edit it on Actuals.", NOTE)
-put(bg, "A46", "· The credit is drawn in tranches, so no single disbursement shows in the statement.", NOTE)
-put(bg, "A47", "· This sheet is the construction phase; CF_Monthly and Annual are the first full operating year.", NOTE)
+put(bg, f"A{XS+5}", "· ბიუჯეტი კრედიტის თანხაა (Assumptions!B27). ხარჯი — ბანკის ამონაწერიდან, ცვლილება Actuals-ზე ხდება.", TXT)
+put(bg, f"A{XS+6}", "· კრედიტი ტრანშებად გაიცემა, ამიტომ ამონაწერში ერთიანი ჩარიცხვა არ ჩანს.", TXT)
+put(bg, f"A{XS+7}", "· ეს ფურცელი მშენებლობის ფაზაა; CF_Monthly და Annual პირველ სრულ საოპერაციო წელს ასახავს.", TXT)
+put(bg, f"A{XS+8}", "· The budget is the credit amount; the spend comes from the bank statement — edit it on Actuals.", NOTE)
+put(bg, f"A{XS+9}", "· The credit is drawn in tranches, so no single disbursement shows in the statement.", NOTE)
+put(bg, f"A{XS+10}", "· This sheet is the construction phase; CF_Monthly and Annual are the first full operating year.", NOTE)
 
 wb.move_sheet(bg, offset=-7)
 

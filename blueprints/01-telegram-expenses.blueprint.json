@@ -91,7 +91,7 @@
               "module": "google-sheets:filterRows",
               "version": 2,
               "metadata": {
-                "notes": "Filter on column A (date), which every row has. Do NOT filter on column P: Google returns an empty range for an all-blank column, so the filter matched nothing and /balance answered 0 records against a real ledger. sheetId is the TAB name, not the file name; check it in the Sheet Name dropdown rather than assuming.",
+                "notes": "Filter on column A (date), which every row has. Do NOT filter on column P: Google returns an empty range for an all-blank column, so the filter matched nothing and /balance answered 0 records against a real ledger. sheetId is the TAB name - it is literally 'Untitled'.",
                 "designer": {
                   "x": 900,
                   "y": -150,
@@ -707,6 +707,7 @@
       "Replace four placeholders before the first run: <<OWNER_CHAT_ID>> (module 2), <<LEDGER_SPREADSHEET_ID>> and <<LEDGER_TAB_NAME>> (modules 4 and 8), and the system prompt in module 6.",
       "Five router routes: /balance reads the ledger; anything not starting with / is an expense; /blocks and /foundation are pure Make arithmetic; /help and /start print the command list.",
       "THE EXPENSE PATH HAS TWO READERS. Module 20 reads the message by pattern match before the model is called and never fails. Module 6 calls Claude. Module 22 picks: the model's answer if there is one, the pattern match if there is not. So an expense is still recorded when the Anthropic balance is empty, the key is rejected or the model breaks the JSON contract.",
+      "The nine category codes live in three places that must agree: the system prompt in module 6, prompts/01-expense-agent.md, and finance/build_model.py. Nothing infers them at run time. fuel and worker_meals were split out of services on 21 September 2026.",
       "Modules 6 and 7 use builtin:Resume, NOT builtin:Ignore. Ignore drops the bundle, which would skip the write; Resume carries on with an empty output so module 22 can fall back. This matters: an Anthropic failure disabled the whole scenario on 17, 18 and 21 September, because Make flags a scenario isinvalid when a module keeps failing at run time and then activation silently does nothing.",
       "The fallback refuses to guess in three cases and writes nothing in any of them: no digits in the message, a thousands separator (104 500 would be read as 104), or a foreign currency with no rate. Each gets its own question back.",
       "A row written without the model carries channel 'telegram-fallback' in column L, category 'other', confidence 0.5, and a note in column Q. Those rows need their category set by hand - the reply says so at the time.",

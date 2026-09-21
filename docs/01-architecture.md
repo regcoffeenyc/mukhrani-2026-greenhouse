@@ -51,7 +51,7 @@ by editing `prompts/01-expense-agent.md`.
 The ledger is the audit trail for a bank-financed project — it has to be
 append-only or it is not evidence of anything.
 
-## The seven categories
+## The nine categories
 
 The bot may only use these, because the financial model reads them by name:
 
@@ -63,11 +63,22 @@ The bot may only use these, because the financial model reads them by name:
 | `salaries` | OPEX | wages |
 | `taxes` | OPEX | tax office, pension fund |
 | `services` | OPEX | consultants, accounting, contracted services |
+| `fuel` | OPEX | diesel, petrol, gas — machinery, generators, site transport |
+| `worker_meals` | OPEX | feeding the crew, including an advance to the director for it |
 | `other` | CAPEX | registry fees, permits |
 
 CAPEX lands in the cost of the greenhouse; OPEX is money spent running the
-project before there is a crop. The split is the difference between 78,971 GEL
-of asset and 11,570 GEL of cost in the numbers as they stand.
+project before there is a crop. As it stands that is 192,702 GEL of asset
+against 24,540 GEL of cost.
+
+**Adding a category is a four-place change** and all four must land in the same
+commit, or the model and the bot disagree about what a row means:
+`prompts/01-expense-agent.md`, the system prompt pasted into Make module 6,
+`finance/build_model.py` (the `CAT_*` constants, `CATS_A` and `bcats`), and this
+table. Nothing infers a category list at run time. The row numbers below the
+category block on both the Actuals and Budget sheets are computed from the list
+itself, so adding one does not shift a formula out from under a check —
+that was not true before 21 September 2026 and it broke silently when it was.
 
 ## Receipt photos
 
