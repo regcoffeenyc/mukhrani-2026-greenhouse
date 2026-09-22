@@ -1046,7 +1046,7 @@ where = [
     ("დახარჯული დღემდე / SPENT to date", f"=B{BTOT}", BOLD, None),
     ("ავანსი დირექტორზე / ADVANCE issued to the director",
      f'=SUMIF($D${BR0}:$D${BEND},"ADVANCE",$B${BR0}:$B${BEND})', TXT, None),
-    ("აქედან ანგარიშგებულია / of which already accounted for by receipts", 200, INPB, FILL_KEY),
+    ("აქედან ანგარიშგებულია / of which already accounted for by receipts", 3019.65, INPB, FILL_KEY),
     ("ვალდებულება — ხელშეკრულებების ნაშთი / COMMITTED — contracts outstanding", f"=D{N1_OUT}", BOLD, None),
     ("სულ დახარჯული ან ვალდებული / USED or COMMITTED", "=B7+(B8-B9)+B10", BOLD, FILL_TOT),
     ("თავისუფალი ნაშთი / FREE budget left", "=B6-B11", BOLD, FILL_TOT),

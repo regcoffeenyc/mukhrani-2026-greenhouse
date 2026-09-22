@@ -12,15 +12,23 @@ LLC Mukhrani 2026 (ID 404801602) · hydroponic greenhouse · 625,000 GEL budget
 |---|---:|---:|
 | ბიუჯეტი — კრედიტი / Budget — the credit | 625,000.00 | 100.0% |
 | დახარჯული / Spent | 210,261.64 | 33.6% |
-| ავანსი დირექტორზე, ანგარიშგების გარეშე / Advance not yet accounted | 9,800.00 | 1.6% |
+| ავანსი დირექტორზე, ანგარიშგების გარეშე / Advance not yet accounted | 6,980.35 | 1.1% |
 | ვალდებული — ხელშეკრულებები / Committed — contracts | 176,511.20 | 28.2% |
-| **დახარჯული ან ვალდებული / Used or committed** | **396,572.84** | **63.5%** |
-| **თავისუფალი / Free** | **228,427.16** | **36.5%** |
+| **დახარჯული ან ვალდებული / Used or committed** | **393,753.19** | **63.0%** |
+| **თავისუფალი / Free** | **231,246.81** | **37.0%** |
 
 *22 სექტემბერი 2026 · 30 საბანკო გადარიცხვა + 21 საწვავი / as at 22 September 2026 —
 30 bank payments plus 21 fuel entries. ორი საბანკო ჩანაწერი (19 და 21/09) მფლობელის
 მონაცემია; საწვავი აპლიკაციიდანაა და ამონაწერში არ ჩანს. Two bank rows (19 and 21 Sep) are
 owner-reported; the fuel comes from the fuel app and does not appear in the bank statement.*
+
+**შემოწმება / The reconciliation that ties it together.** დახარჯული + ავანსის
+აუთვისებელი ნაწილი = 210,261.64 + 6,980.35 = **217,241.99 ₾**, რაც ზუსტად
+უდრის ბანკიდან გასულ თანხას. / Spend plus the unaccounted part of the advance
+equals 217,241.99 GEL — exactly the total paid out of account GE66…3602. The
+fuel adds nothing on top because all of it was funded from the advance: 2,819.65
+was paid personally before 21 September and repaid out of it, and 200 came from
+it directly. Nothing is owed to the director.
 
 ## რა დევს აქ / What is here
 
