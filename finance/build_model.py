@@ -827,7 +827,7 @@ meta = [
     ("ანგარიში / Account", "GE66CR0000009572073602"),
     ("მფლობელი / Account name", "შპს მუხრანი 2026 / LLC Mukhrani 2026"),
     ("მოთხოვნილი პერიოდი / Period requested", "01/04/2026 – 21/09/2026"),
-    ("ფაქტობრივი ჩანაწერები / Entries present", "01/07/2026 – 21/09/2026 · 30 გადარიცხვა / 30 payments"),
+    ("ფაქტობრივი ჩანაწერები / Entries present", "01/07/2026 – 21/09/2026 · 30 საბანკო + 20 საწვავი / 30 bank + 20 fuel-card"),
     ("ჩარიცხვა / Inflow", "14/09/2026 — 30,000 ₾, კრედიტის ტრანში GA/1-876787-001 — ხარჯი არ არის, ქვემოთ არ ითვლება / "
                           "a tranche of the credit, not an expense, excluded below"),
 ]
@@ -886,6 +886,31 @@ txns = [
     (date(2026, 9, 19), "ავანსი ხელშეკრულება N1 (40 000 აშშ დოლარი, ერ.კ. 2.6125)",
      "შპს ჯიესენ გრუპ", CAT_BUILD, -104500.00),
     (date(2026, 9, 21), "მუშების კვება — საქვეანგარიშოდ დირექტორზე", "გოდერძი მეტრეველი", CAT_FOOD, -10000.00),
+    # --- საწვავის ბარათი, 20 ჩასხმა 02/07–17/09/2026 / fuel card, 20 fills ---
+    # Transcribed from the fuel app on 22/09/2026. These are NOT in the bank
+    # statement: the card is settled outside account GE66...3602. Unit prices run
+    # 3.37 to 3.85 GEL/l over the period and diesel sits above petrol, which is
+    # the arithmetic check that the transcription is right.
+    (date(2026, 7, 2), "საწვავი G-Force Premium 27.62 ლ — SANAPIRO", "", CAT_FUEL, -100.00),
+    (date(2026, 7, 5), "საწვავი G-Force Premium 29.67 ლ — COSMONAVTI EXPRESS", "", CAT_FUEL, -100.00),
+    (date(2026, 7, 9), "საწვავი G-Force Premium 65 ლ — COSMONAVTI EXPRESS", "", CAT_FUEL, -222.30),
+    (date(2026, 7, 17), "საწვავი G-Force Premium 50 ლ — COSMONAVTI EXPRESS", "", CAT_FUEL, -171.00),
+    (date(2026, 7, 19), "საწვავი Euro Diesel 11.55 ლ — SAGAREJO", "", CAT_FUEL, -44.12),
+    (date(2026, 7, 22), "საწვავი G-Force Premium 65 ლ — COSMONAVTI EXPRESS", "", CAT_FUEL, -219.05),
+    (date(2026, 7, 26), "საწვავი G-Force Premium 30 ლ — COSMONAVTI EXPRESS", "", CAT_FUEL, -103.50),
+    (date(2026, 7, 29), "საწვავი G-Force Premium 50 ლ — COSMONAVTI EXPRESS", "", CAT_FUEL, -172.50),
+    (date(2026, 8, 4), "საწვავი G-Force Premium 50 ლ — COSMONAVTI EXPRESS", "", CAT_FUEL, -175.00),
+    (date(2026, 8, 6), "საწვავი G-Force Premium 60 ლ — BIO", "", CAT_FUEL, -210.00),
+    (date(2026, 8, 7), "საწვავი Euro Diesel 11 ლ — COSMONAVTI EXPRESS", "", CAT_FUEL, -42.90),
+    (date(2026, 8, 9), "საწვავი G-Force Premium 28.99 ლ — BIO", "", CAT_FUEL, -100.00),
+    (date(2026, 8, 20), "საწვავი G-Force Premium 10 ლ — COSMONAVTI EXPRESS", "", CAT_FUEL, -35.60),
+    (date(2026, 9, 3), "საწვავი G-Force Premium 10 ლ — COSMONAVTI EXPRESS", "", CAT_FUEL, -36.60),
+    (date(2026, 9, 3), "საწვავი G-Force Premium 40 ლ — COSMONAVTI EXPRESS", "", CAT_FUEL, -146.40),
+    (date(2026, 9, 8), "საწვავი G-Force Premium 21.38 ლ — LILO", "", CAT_FUEL, -81.03),
+    (date(2026, 9, 9), "საწვავი G-Force Premium 60 ლ — ZESTAPHONI", "", CAT_FUEL, -224.40),
+    (date(2026, 9, 11), "საწვავი G-Force Premium 50 ლ — PIKRIS GORA", "", CAT_FUEL, -192.50),
+    (date(2026, 9, 14), "საწვავი G-Force Premium 65 ლ — TSEROVANI", "", CAT_FUEL, -250.25),
+    (date(2026, 9, 17), "საწვავი G-Force Premium 50 ლ — NAREKVAVI", "", CAT_FUEL, -192.50),
 ]
 TR0 = 13
 for i, (d, desc, cp, cat, amt) in enumerate(txns):
@@ -977,6 +1002,33 @@ put(bg, "A1", "ბიუჯეტი და გახარჯვა / BUDGET AN
 put(bg, "A2", "ბიუჯეტი — 625,000 ₾ კრედიტი. გახარჯვა — ბანკის ამონაწერი (Actuals). / "
               "The budget is the 625,000 GEL credit; the spend is the bank statement on the Actuals sheet.", NOTE)
 
+# ---------------- Budget sheet geometry ----------------
+# Defined BEFORE anything is written, because the summary at the top of the
+# sheet points DOWN into blocks that move when a category is added. On
+# 22 September 2026 "SPENT to date" was still pointing at =B21, the total row
+# under the old seven-category layout, and quietly reported the supplier-invoice
+# line — 7,505.41 instead of 220,061.64 — while every internal check still read
+# zero, because the checks only compare cells inside the block that moved
+# together. Nothing here may be a literal row number.
+BCATS = [
+    ("მშენებლობის ავანსი / Construction advance", CAT_BUILD, "CAPEX"),
+    ("ხელფასი / Salaries", CAT_PAY, "OPEX"),
+    ("გადასახადები / Taxes & pension", CAT_TAX, "OPEX"),
+    ("მომსახურება / Services", CAT_SVC, "OPEX"),
+    ("საწვავი / Fuel", CAT_FUEL, "OPEX"),
+    ("მუშების კვება / Worker meals", CAT_FOOD, "OPEX"),
+    ("მასალები / Materials", CAT_MAT, "CAPEX"),
+    ("მომწოდებლის ინვოისი / Supplier invoice", CAT_INV, "CAPEX"),
+    ("სხვა / Other", CAT_OTH, "CAPEX"),
+]
+BR0 = 14                           # first category row
+BEND = BR0 + len(BCATS) - 1        # last category row
+BTOT = BEND + 1                    # "total spent"
+DS = BTOT + 2                      # drawdown-by-month section
+NS = BTOT + 9                      # contract N1 section
+XS = BTOT + 16                     # capex/opex section
+N1_OUT = NS + 4                    # contract N1 outstanding
+
 # ---------------- 1. where we are ----------------
 section(bg, 4, "1. სად ვართ / WHERE WE ARE", "F")
 for col, h in zip("ABCD", ["მაჩვენებელი / Item", "GEL", "% ბიუჯეტიდან / of budget", "ინდიკატორი / Bar"]):
@@ -984,8 +1036,8 @@ for col, h in zip("ABCD", ["მაჩვენებელი / Item", "GEL", "%
 
 where = [
     ("ბიუჯეტი — კრედიტი / BUDGET — the credit", "=Assumptions!$B$27", LNKB, FILL_KEY),
-    ("დახარჯული დღემდე / SPENT to date", "=B21", BOLD, None),
-    ("ვალდებულება — ხელშ. N1-ის ნაშთი / COMMITTED — contract N1 outstanding", "=D34", BOLD, None),
+    ("დახარჯული დღემდე / SPENT to date", f"=B{BTOT}", BOLD, None),
+    ("ვალდებულება — ხელშ. N1-ის ნაშთი / COMMITTED — contract N1 outstanding", f"=D{N1_OUT}", BOLD, None),
     ("სულ დახარჯული ან ვალდებული / USED or COMMITTED", "=B7+B8", BOLD, FILL_TOT),
     ("თავისუფალი ნაშთი / FREE budget left", "=B6-B9", BOLD, FILL_TOT),
 ]
@@ -1009,26 +1061,7 @@ for col, h in zip("ABCDEF", ["კატეგორია / Category", "და�
 A_CAT_ROW = {cat: CS + 2 + i for i, cat in enumerate(CATS_A)}
 A_MONTH_ROW = [MS + 2 + i for i in range(3)]
 
-bcats = [
-    ("მშენებლობის ავანსი / Construction advance", A_CAT_ROW[CAT_BUILD], "CAPEX"),
-    ("ხელფასი / Salaries", A_CAT_ROW[CAT_PAY], "OPEX"),
-    ("გადასახადები / Taxes & pension", A_CAT_ROW[CAT_TAX], "OPEX"),
-    ("მომსახურება / Services", A_CAT_ROW[CAT_SVC], "OPEX"),
-    ("საწვავი / Fuel", A_CAT_ROW[CAT_FUEL], "OPEX"),
-    ("მუშების კვება / Worker meals", A_CAT_ROW[CAT_FOOD], "OPEX"),
-    ("მასალები / Materials", A_CAT_ROW[CAT_MAT], "CAPEX"),
-    ("მომწოდებლის ინვოისი / Supplier invoice", A_CAT_ROW[CAT_INV], "CAPEX"),
-    ("სხვა / Other", A_CAT_ROW[CAT_OTH], "CAPEX"),
-]
-# Every row number below this block is derived from BR0 and the length of
-# bcats. Adding a category used to mean editing twenty literals by hand and
-# silently breaking the checks if one was missed.
-BR0 = 14
-BEND = BR0 + len(bcats) - 1        # last category row
-BTOT = BEND + 1                    # "total spent"
-DS = BTOT + 2                      # drawdown section
-NS = BTOT + 9                      # contract N1 section
-XS = BTOT + 16                     # capex/opex section
+bcats = [(lab, A_CAT_ROW[cat], treat) for lab, cat, treat in BCATS]
 for i, (lab, src, treat) in enumerate(bcats):
     r = BR0 + i
     put(bg, f"A{r}", lab, TXT, border=BOX)
