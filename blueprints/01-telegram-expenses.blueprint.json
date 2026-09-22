@@ -72,30 +72,43 @@
                 ]
               },
               "mapper": {
-                "limit": 500,
-                "filter": [
-                  [
-                    {
-                      "a": "A",
-                      "o": "exist"
-                    }
-                  ]
-                ],
-                "sheetId": "<<LEDGER_TAB_NAME>>",
-                "sortOrder": "desc",
+                "select": "map",
                 "spreadsheetId": "<<LEDGER_SPREADSHEET_ID>>",
-                "includesHeaders": true,
-                "from": "drive",
-                "tableFirstRow": "A1:CZ1"
+                "sheetId": "summary",
+                "cell": "A1",
+                "valueRenderOption": "UNFORMATTED_VALUE"
               },
-              "module": "google-sheets:filterRows",
+              "module": "google-sheets:getCell",
               "version": 2,
               "metadata": {
-                "notes": "Filter on column A (date), which every row has. Do NOT filter on column P: Google returns an empty range for an all-blank column, so the filter matched nothing and /balance answered 0 records against a real ledger. sheetId is the TAB name, not the file name; check it in the Sheet Name dropdown rather than assuming.",
+                "notes": "Reads ONE cell, which the spreadsheet computes as SUMIF(P,\"live\",F). It does not read the ledger row by row. google-sheets:filterRows (Search Rows) was used here until 22 September 2026 and was wrong from the first day: that module emits ONE BUNDLE PER MATCHING ROW, so the reply fired once per row - the owner got fifty-one identical messages - and '4.array' is not a field on a row bundle, so every one of them summed nothing and reported 0.00 and 0 records. Aggregating in the sheet is simpler than aggregating in Make and keeps the void rule in one place. The summary tab holds: A1 spent, A2 live row count, A3 voided amount, A4 voided count.",
                 "designer": {
                   "x": 900,
                   "y": -150,
-                  "name": "Read ledger"
+                  "name": "Read: spent"
+                }
+              },
+              "parameters": {
+                "__IMTCONN__": null
+              }
+            },
+            {
+              "id": 24,
+              "mapper": {
+                "select": "map",
+                "spreadsheetId": "<<LEDGER_SPREADSHEET_ID>>",
+                "sheetId": "summary",
+                "cell": "A2",
+                "valueRenderOption": "UNFORMATTED_VALUE"
+              },
+              "module": "google-sheets:getCell",
+              "version": 2,
+              "metadata": {
+                "notes": "COUNTIF(P,\"live\") - the number of rows behind the total.",
+                "designer": {
+                  "x": 1050,
+                  "y": -150,
+                  "name": "Read: record count"
                 }
               },
               "parameters": {
@@ -105,7 +118,7 @@
             {
               "id": 5,
               "mapper": {
-                "text": "<b>ბიუჯეტი / Budget</b>\n\nბიუჯეტი: <b>625,000 ₾</b>\nდახარჯული: <b>{{formatNumber(sum(map(4.array; \"F\")); 2; \".\"; \",\")}} ₾</b>\nდარჩენილი: <b>{{formatNumber(625000 - sum(map(4.array; \"F\")); 2; \".\"; \",\")}} ₾</b>\nჩანაწერი: {{length(4.array)}}",
+                "text": "<b>ბიუჯეტი / Budget</b>\n\nბიუჯეტი: <b>625,000 ₾</b>\nდახარჯული: <b>{{formatNumber(parseNumber(4.value; \".\"); 2; \".\"; \",\")}} ₾</b>\nდარჩენილი: <b>{{formatNumber(625000 - parseNumber(4.value; \".\"); 2; \".\"; \",\")}} ₾</b>\nჩანაწერი: {{24.value}}",
                 "chatId": "{{1.message.chat.id}}",
                 "parseMode": "HTML"
               },
@@ -113,10 +126,11 @@
               "version": 1,
               "metadata": {
                 "designer": {
-                  "x": 1200,
+                  "x": 1350,
                   "y": -150,
                   "name": "Reply: where we are"
-                }
+                },
+                "notes": "Exactly one reply, because modules 4 and 24 each return exactly one bundle."
               },
               "parameters": {
                 "__IMTCONN__": null
@@ -722,9 +736,10 @@
       "Module configuration verified with validate_module_configuration. Three things Make rejects silently: a bare 'ne' filter operator, a 'mode' field on filterRows, and a messages[] entry without inputType. Any of them leaves the scenario isinvalid and un-activatable, with no error shown until you try to switch it on.",
       "Make's expression argument separator is a semicolon everywhere: formatNumber(n; 2; \".\"; \",\"). A comma between the last two arguments looks right and formats wrongly.",
       "A filter stops the whole branch it sits on, so mutually exclusive outcomes need a router, not a sequence of filtered modules. That is why module 21 exists.",
-      "Google Sheets returns an empty range for a column that is blank in every row. Filtering on such a column yields zero rows with no error at all, so /balance answers 0 instead of failing. Filter on a column that is always populated - here column A.",
       "No WebhookRespond module: it is unsupported alongside sequential processing, and Make returns 200 by itself. sequential stays on so two quick messages cannot race into the same sheet row.",
-      "The 10,000 GEL gate is released by the word დიახ in the message, read by module 20 into `ok` and applied in module 22 to BOTH the model's confirm_first and the fallback's. Until 21 September nothing read that word, so the gate had no exit and no payment at or above 10,000 could be recorded through the bot at all."
+      "The 10,000 GEL gate is released by the word დიახ in the message, read by module 20 into `ok` and applied in module 22 to BOTH the model's confirm_first and the fallback's. Until 21 September nothing read that word, so the gate had no exit and no payment at or above 10,000 could be recorded through the bot at all.",
+      "/balance does NOT read the ledger row by row. google-sheets:filterRows emits one bundle per matching row, which made the reply fire once per row and made '4.array' meaningless - it answered 0.00 and 0 records from the first day and nobody noticed until 22 September 2026, when 51 rows produced 51 identical Telegram messages. The total and the row count are now SUMIF/COUNTIF formulas on a separate 'summary' tab, read one cell at a time with google-sheets:getCell, which returns a single bundle. Set valueRenderOption to UNFORMATTED_VALUE or the value comes back with thousands separators.",
+      "The summary tab is the only place the void rule lives: A1 =SUMIF(Untitled!$P$2:$P,\"live\",Untitled!$F$2:$F), A2 =COUNTIF(...,\"live\"), A3 and A4 the same for \"void\". Column P must therefore never be blank on a row - module 8 writes 'live' on every append."
     ]
   }
 }

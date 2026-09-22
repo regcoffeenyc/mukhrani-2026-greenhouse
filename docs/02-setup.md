@@ -140,7 +140,7 @@ project: do not switch it back on.
 | Send | Expect |
 |---|---|
 | `/help` | the command list |
-| `/balance` | Budget 625,000 ₾ · spent 217,241.99 ₾ · left 407,758.01 ₾ · 30 records |
+| `/balance` | **one** message: spent 220,261.64 ₾ · left 404,738.36 ₾ · 51 records |
 | `/blocks 180 0.8` | 1,757 blocks · 17 bags of cement · 2.5 m³ sand |
 | `/foundation 180 0.4 0.5` | 37.8 m³ concrete · 257 bags · 1,133 kg rebar |
 | `ბეტონი 250 ლარი` | ✅ logged, materials, CAPEX — check the row landed in the sheet |
@@ -287,12 +287,50 @@ the values carried in `callback_query.message.text`. Optional — the word works
 | `Unable to parse range: '<name>'!P2:...` | `sheetId` in module 4 or 8 does not match the tab name character for character |
 | `/balance` answers 0 records when the sheet has rows | The read filter points at a column that is blank in every row — see below |
 
-**The blank-column trap.** Google Sheets returns an *empty range* for a column
-that is blank in every row, so a filter on that column matches nothing and the
-module succeeds with zero rows. No error, no warning — `/balance` just answers
-`0.00 ₾ · 0 records` and looks like an empty ledger. The read filter therefore
-uses column A (date), which every row has. Column P is written `live` on every
-new row so it will be safe to filter on later.
+**How `/balance` works, and the bug that hid in it for five days.**
+
+It does **not** read the ledger row by row. The spent total and the record
+count are SUMIF/COUNTIF formulas on a separate **`summary`** tab, and the bot
+reads two cells:
+
+| Cell | Formula |
+|---|---|
+| `summary!A1` | `=SUMIF(Untitled!$P$2:$P,"live",Untitled!$F$2:$F)` |
+| `summary!A2` | `=COUNTIF(Untitled!$P$2:$P,"live")` |
+| `summary!A3`, `A4` | the same two for `"void"` |
+
+Until 22 September 2026 it used `google-sheets:filterRows` (Search Rows).
+**That module emits one bundle per matching row.** Two things followed, and
+both were invisible until the ledger got big:
+
+- the reply module fired **once per row** — 51 rows, 51 identical Telegram
+  messages;
+- `4.array` is not a field on a row bundle, so every reply summed nothing and
+  answered `0.00 ₾ · 0 records`.
+
+`/balance` had therefore *never once been right*. The first symptom was
+reported on 17 September and misdiagnosed twice — first as a blank-column
+problem, then as a void-filter problem — because `0.00 ₾ · 0 records` is
+exactly what an empty ledger looks like, and both wrong explanations predicted
+it. What finally gave it away was the volume of duplicate messages, which only
+a per-row loop can produce.
+
+Two lessons worth keeping. A Make search module is a *loop*, not a query —
+if you want one answer, aggregate before you reply. And a wrong number that
+equals the empty case is the hardest kind to spot: it looks like no data
+rather than bad code.
+
+**Why the sheet does the arithmetic.** It is less code than a Make aggregator,
+Google recomputes it the instant a row lands, and the void rule lives in exactly
+one place. The cost is that column P must never be blank — module 8 writes
+`live` on every append, and fifteen old rows that predated the flag were filled
+in on 22 September.
+
+**The blank-column trap (still true, still worth knowing).** Google Sheets
+returns an *empty range* for a column that is blank in every row, so a filter
+on that column matches nothing and the module succeeds with zero rows. No
+error, no warning. That is why column P could not be filtered on until every
+row carried a value.
 
 **The invalid-scenario trap.** Make marks a scenario `isinvalid` when any module
 fails configuration validation, and then activation quietly does nothing — the
