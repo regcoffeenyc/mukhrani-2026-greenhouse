@@ -849,6 +849,9 @@ CAT_INV = "მომწოდებლის ინვოისი / Supplier in
 CAT_FUEL = "საწვავი / Fuel"
 CAT_FOOD = "მუშების კვება / Worker meals"
 CAT_OTH = "სხვა / Other"
+# Not an expense. Cash left the bank, but what it bought is recorded separately
+# as the receipts come in, so it must never be added to the spend total.
+CAT_ADV = "ავანსი დირექტორზე / Advance to the director"
 
 txns = [
     (date(2026, 7, 1), "ინვოისი", "შპს ტერმინალ ვესტ თრეიდინგ", CAT_INV, -1409.41),
@@ -885,7 +888,8 @@ txns = [
     # --- მფლობელის მონაცემი, 21/09/2026 / reported by the owner, 21 September ---
     (date(2026, 9, 19), "ავანსი ხელშეკრულება N1 (40 000 აშშ დოლარი, ერ.კ. 2.6125)",
      "შპს ჯიესენ გრუპ", CAT_BUILD, -104500.00),
-    (date(2026, 9, 21), "მუშების კვება — საქვეანგარიშოდ დირექტორზე", "გოდერძი მეტრეველი", CAT_FOOD, -10000.00),
+    (date(2026, 9, 21), "საქვეანგარიშო ავანსი დირექტორზე — საწვავი და მუშების კვება",
+     "გოდერძი მეტრეველი", CAT_ADV, -10000.00),
     # --- საწვავის ბარათი, 20 ჩასხმა 02/07–17/09/2026 / fuel card, 20 fills ---
     # Transcribed from the fuel app on 22/09/2026. These are NOT in the bank
     # statement: the card is settled outside account GE66...3602. Unit prices run
@@ -930,7 +934,7 @@ for col in "BCD":
 put(ac, f"E{RTOT}", f"=SUM(E{TR0}:E{TREND})", BOLD, fmt=GEL2, fill=FILL_TOT, border=BOX, align="right")
 
 CATS_A = [CAT_BUILD, CAT_PAY, CAT_TAX, CAT_SVC, CAT_FUEL, CAT_FOOD,
-          CAT_MAT, CAT_INV, CAT_OTH]
+          CAT_MAT, CAT_INV, CAT_OTH, CAT_ADV]
 CS = RTOT + 2
 section(ac, CS, "კატეგორიების მიხედვით / BY CATEGORY", "E")
 put(ac, f"A{CS+1}", "კატეგორია / Category", H1, fill=FILL_H)
@@ -1022,8 +1026,9 @@ BCATS = [
     ("მასალები / Materials", CAT_MAT, "CAPEX"),
     ("მომწოდებლის ინვოისი / Supplier invoice", CAT_INV, "CAPEX"),
     ("სხვა / Other", CAT_OTH, "CAPEX"),
+    ("ავანსი დირექტორზე / Advance to the director", CAT_ADV, "ADVANCE"),
 ]
-BR0 = 14                           # first category row
+BR0 = 16                           # first category row (the summary above it needs rows 6-12)
 BEND = BR0 + len(BCATS) - 1        # last category row
 BTOT = BEND + 1                    # "total spent"
 DS = BTOT + 2                      # drawdown-by-month section
@@ -1039,10 +1044,14 @@ for col, h in zip("ABCD", ["მაჩვენებელი / Item", "GEL", "%
 where = [
     ("ბიუჯეტი — კრედიტი / BUDGET — the credit", "=Assumptions!$B$27", LNKB, FILL_KEY),
     ("დახარჯული დღემდე / SPENT to date", f"=B{BTOT}", BOLD, None),
+    ("ავანსი დირექტორზე / ADVANCE issued to the director",
+     f'=SUMIF($D${BR0}:$D${BEND},"ADVANCE",$B${BR0}:$B${BEND})', TXT, None),
+    ("აქედან ანგარიშგებულია / of which already accounted for by receipts", 200, INPB, FILL_KEY),
     ("ვალდებულება — ხელშეკრულებების ნაშთი / COMMITTED — contracts outstanding", f"=D{N1_OUT}", BOLD, None),
-    ("სულ დახარჯული ან ვალდებული / USED or COMMITTED", "=B7+B8", BOLD, FILL_TOT),
-    ("თავისუფალი ნაშთი / FREE budget left", "=B6-B9", BOLD, FILL_TOT),
+    ("სულ დახარჯული ან ვალდებული / USED or COMMITTED", "=B7+(B8-B9)+B10", BOLD, FILL_TOT),
+    ("თავისუფალი ნაშთი / FREE budget left", "=B6-B11", BOLD, FILL_TOT),
 ]
+
 for i, (lab, f_, font, fill) in enumerate(where):
     r = 6 + i
     put(bg, f"A{r}", lab, font, border=BOX, fill=fill)
@@ -1051,10 +1060,10 @@ for i, (lab, f_, font, fill) in enumerate(where):
     put(bg, f"D{r}", f'=REPT("|",ROUND(C{r}*40,0))', TXT, border=BOX, fill=fill)
 
 # ---------------- 2. spend by category ----------------
-section(bg, 12, "2. გახარჯვა კატეგორიებად / SPEND BY CATEGORY", "F")
+section(bg, BR0 - 2, "2. გახარჯვა კატეგორიებად / SPEND BY CATEGORY", "F")
 for col, h in zip("ABCDEF", ["კატეგორია / Category", "დახარჯული GEL / Spent", "% ხარჯიდან / of spend",
                              "კლასიფიკაცია / Treatment", "დაგეგმილი / Planned", "სხვაობა / Variance"]):
-    put(bg, f"{col}13", h, H1, fill=FILL_H, align="center")
+    put(bg, f"{col}{BR0-1}", h, H1, fill=FILL_H, align="center")
 
 # The source rows live on Actuals and move whenever a payment is added, so they
 # are computed from the same variables that laid that sheet out — never typed in.
@@ -1073,8 +1082,8 @@ for i, (lab, src, treat) in enumerate(bcats):
     c = put(bg, f"E{r}", None, INPB, fmt=GEL, border=BOX, align="right")
     c.fill = FILL_KEY
     put(bg, f"F{r}", f'=IF(E{r}="","",E{r}-B{r})', TXT, fmt=GEL, border=BOX, align="right")
-put(bg, f"A{BTOT}", "სულ დახარჯული / TOTAL SPENT", BOLD, fill=FILL_TOT, border=BOX)
-put(bg, f"B{BTOT}", f"=SUM(B{BR0}:B{BEND})", BOLD, fmt=GEL2, fill=FILL_TOT, border=BOX, align="right")
+put(bg, f"A{BTOT}", "სულ დახარჯული — ავანსის გარეშე / TOTAL SPENT, advances excluded", BOLD, fill=FILL_TOT, border=BOX)
+put(bg, f"B{BTOT}", f'=SUM(B{BR0}:B{BEND})-SUMIF($D${BR0}:$D${BEND},"ADVANCE",$B${BR0}:$B${BEND})', BOLD, fmt=GEL2, fill=FILL_TOT, border=BOX, align="right")
 put(bg, f"C{BTOT}", f"=IFERROR(B{BTOT}/B{BTOT},0)", BOLD, fmt=PCT, fill=FILL_TOT, border=BOX, align="right")
 put(bg, f"D{BTOT}", "", TXT, fill=FILL_TOT, border=BOX)
 put(bg, f"E{BTOT}", f"=IF(COUNT(E{BR0}:E{BEND})=0,\"\",SUM(E{BR0}:E{BEND}))", BOLD, fmt=GEL, fill=FILL_TOT, border=BOX, align="right")
@@ -1097,7 +1106,7 @@ for i, (lab, src) in enumerate([("ივლისი 2026 / July", A_MONTH_ROW[0
     put(bg, f"D{r}", f"=$B$6-C{r}", BOLD, fmt=GEL, border=BOX, align="right")
 put(bg, f"A{DS+5}", "სულ / TOTAL", BOLD, fill=FILL_TOT, border=BOX)
 put(bg, f"B{DS+5}", f"=SUM(B{DS+2}:B{DS+4})", BOLD, fmt=GEL2, fill=FILL_TOT, border=BOX, align="right")
-put(bg, f"C{DS+5}", f"=B{DS+5}-B{BTOT}", BOLD, fmt=GEL2, fill=FILL_TOT, border=BOX, align="right")
+put(bg, f"C{DS+5}", f'=B{DS+5}-B{BTOT}-SUMIF($D${BR0}:$D${BEND},"ADVANCE",$B${BR0}:$B${BEND})', BOLD, fmt=GEL2, fill=FILL_TOT, border=BOX, align="right")
 put(bg, f"D{DS+5}", f"=$B$6-B{DS+5}", BOLD, fmt=GEL, fill=FILL_TOT, border=BOX, align="right")
 put(bg, f"G{DS+5}", f"C{DS+5} შემოწმებაა — უნდა იყოს 0 / C{DS+5} is a check — it must read 0", NOTE)
 

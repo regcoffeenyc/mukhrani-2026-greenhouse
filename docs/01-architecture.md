@@ -51,7 +51,7 @@ by editing `prompts/01-expense-agent.md`.
 The ledger is the audit trail for a bank-financed project — it has to be
 append-only or it is not evidence of anything.
 
-## The nine categories
+## The nine categories, and one that is not a category
 
 The bot may only use these, because the financial model reads them by name:
 
@@ -66,6 +66,16 @@ The bot may only use these, because the financial model reads them by name:
 | `fuel` | OPEX | diesel, petrol, gas — machinery, generators, site transport |
 | `worker_meals` | OPEX | feeding the crew, including an advance to the director for it |
 | `other` | CAPEX | registry fees, permits |
+| `advance` | ADVANCE | **not an expense** — cash handed to someone to spend on the project's behalf |
+
+`advance` is the odd one out and deliberately so. When 10,000 GEL is transferred
+to the director to buy fuel and feed the crew, the money has left the bank but
+nothing has been bought yet. Recording it as spend *and* then recording the fuel
+receipts counts the same lari twice. So an advance row is excluded from the
+spend total, and the Budget sheet shows it on its own line with how much of it
+has been accounted for by receipts so far. The ledger's column P carries
+`advance` rather than `live` for those rows, which is what keeps them out of the
+sum on the `summary` tab.
 
 CAPEX lands in the cost of the greenhouse; OPEX is money spent running the
 project before there is a crop. As it stands that is 192,702 GEL of asset
