@@ -891,28 +891,28 @@ txns = [
     # statement: the card is settled outside account GE66...3602. Unit prices run
     # 3.37 to 3.85 GEL/l over the period and diesel sits above petrol, which is
     # the arithmetic check that the transcription is right.
-    (date(2026, 7, 2), "საწვავი G-Force Premium 27.62 ლ — SANAPIRO", "", CAT_FUEL, -100.00),
-    (date(2026, 7, 5), "საწვავი G-Force Premium 29.67 ლ — COSMONAVTI EXPRESS", "", CAT_FUEL, -100.00),
-    (date(2026, 7, 9), "საწვავი G-Force Premium 65 ლ — COSMONAVTI EXPRESS", "", CAT_FUEL, -222.30),
-    (date(2026, 7, 17), "საწვავი G-Force Premium 50 ლ — COSMONAVTI EXPRESS", "", CAT_FUEL, -171.00),
-    (date(2026, 7, 19), "საწვავი Euro Diesel 11.55 ლ — SAGAREJO", "", CAT_FUEL, -44.12),
-    (date(2026, 7, 22), "საწვავი G-Force Premium 65 ლ — COSMONAVTI EXPRESS", "", CAT_FUEL, -219.05),
-    (date(2026, 7, 26), "საწვავი G-Force Premium 30 ლ — COSMONAVTI EXPRESS", "", CAT_FUEL, -103.50),
-    (date(2026, 7, 29), "საწვავი G-Force Premium 50 ლ — COSMONAVTI EXPRESS", "", CAT_FUEL, -172.50),
-    (date(2026, 8, 4), "საწვავი G-Force Premium 50 ლ — COSMONAVTI EXPRESS", "", CAT_FUEL, -175.00),
-    (date(2026, 8, 6), "საწვავი G-Force Premium 60 ლ — BIO", "", CAT_FUEL, -210.00),
-    (date(2026, 8, 7), "საწვავი Euro Diesel 11 ლ — COSMONAVTI EXPRESS", "", CAT_FUEL, -42.90),
-    (date(2026, 8, 9), "საწვავი G-Force Premium 28.99 ლ — BIO", "", CAT_FUEL, -100.00),
-    (date(2026, 8, 20), "საწვავი G-Force Premium 10 ლ — COSMONAVTI EXPRESS", "", CAT_FUEL, -35.60),
-    (date(2026, 9, 3), "საწვავი G-Force Premium 10 ლ — COSMONAVTI EXPRESS", "", CAT_FUEL, -36.60),
-    (date(2026, 9, 3), "საწვავი G-Force Premium 40 ლ — COSMONAVTI EXPRESS", "", CAT_FUEL, -146.40),
-    (date(2026, 9, 8), "საწვავი G-Force Premium 21.38 ლ — LILO", "", CAT_FUEL, -81.03),
-    (date(2026, 9, 9), "საწვავი G-Force Premium 60 ლ — ZESTAPHONI", "", CAT_FUEL, -224.40),
-    (date(2026, 9, 11), "საწვავი G-Force Premium 50 ლ — PIKRIS GORA", "", CAT_FUEL, -192.50),
-    (date(2026, 9, 14), "საწვავი G-Force Premium 65 ლ — TSEROVANI", "", CAT_FUEL, -250.25),
-    (date(2026, 9, 17), "საწვავი G-Force Premium 50 ლ — NAREKVAVI", "", CAT_FUEL, -192.50),
+    (date(2026, 7, 2), "საწვავი G-Force Premium 27.62 ლ — SANAPIRO", "Gulf", CAT_FUEL, -100.00),
+    (date(2026, 7, 5), "საწვავი G-Force Premium 29.67 ლ — COSMONAVTI EXPRESS", "Gulf", CAT_FUEL, -100.00),
+    (date(2026, 7, 9), "საწვავი G-Force Premium 65 ლ — COSMONAVTI EXPRESS", "Gulf", CAT_FUEL, -222.30),
+    (date(2026, 7, 17), "საწვავი G-Force Premium 50 ლ — COSMONAVTI EXPRESS", "Gulf", CAT_FUEL, -171.00),
+    (date(2026, 7, 19), "საწვავი Euro Diesel 11.55 ლ — SAGAREJO", "Gulf", CAT_FUEL, -44.12),
+    (date(2026, 7, 22), "საწვავი G-Force Premium 65 ლ — COSMONAVTI EXPRESS", "Gulf", CAT_FUEL, -219.05),
+    (date(2026, 7, 26), "საწვავი G-Force Premium 30 ლ — COSMONAVTI EXPRESS", "Gulf", CAT_FUEL, -103.50),
+    (date(2026, 7, 29), "საწვავი G-Force Premium 50 ლ — COSMONAVTI EXPRESS", "Gulf", CAT_FUEL, -172.50),
+    (date(2026, 8, 4), "საწვავი G-Force Premium 50 ლ — COSMONAVTI EXPRESS", "Gulf", CAT_FUEL, -175.00),
+    (date(2026, 8, 6), "საწვავი G-Force Premium 60 ლ — BIO", "Gulf", CAT_FUEL, -210.00),
+    (date(2026, 8, 7), "საწვავი Euro Diesel 11 ლ — COSMONAVTI EXPRESS", "Gulf", CAT_FUEL, -42.90),
+    (date(2026, 8, 9), "საწვავი G-Force Premium 28.99 ლ — BIO", "Gulf", CAT_FUEL, -100.00),
+    (date(2026, 8, 20), "საწვავი G-Force Premium 10 ლ — COSMONAVTI EXPRESS", "Gulf", CAT_FUEL, -35.60),
+    (date(2026, 9, 3), "საწვავი G-Force Premium 10 ლ — COSMONAVTI EXPRESS", "Gulf", CAT_FUEL, -36.60),
+    (date(2026, 9, 3), "საწვავი G-Force Premium 40 ლ — COSMONAVTI EXPRESS", "Gulf", CAT_FUEL, -146.40),
+    (date(2026, 9, 8), "საწვავი G-Force Premium 21.38 ლ — LILO", "Gulf", CAT_FUEL, -81.03),
+    (date(2026, 9, 9), "საწვავი G-Force Premium 60 ლ — ZESTAPHONI", "Gulf", CAT_FUEL, -224.40),
+    (date(2026, 9, 11), "საწვავი G-Force Premium 50 ლ — PIKRIS GORA", "Gulf", CAT_FUEL, -192.50),
+    (date(2026, 9, 14), "საწვავი G-Force Premium 65 ლ — TSEROVANI", "Gulf", CAT_FUEL, -250.25),
+    (date(2026, 9, 17), "საწვავი G-Force Premium 50 ლ — NAREKVAVI", "Gulf", CAT_FUEL, -192.50),
     # მფლობელის მონაცემი / reported by the owner, 22 September — no litres or station given
-    (date(2026, 9, 22), "საწვავი", "", CAT_FUEL, -200.00),
+    (date(2026, 9, 22), "საწვავი", "Gulf", CAT_FUEL, -200.00),
 ]
 TR0 = 13
 for i, (d, desc, cp, cat, amt) in enumerate(txns):
@@ -1028,8 +1028,8 @@ BEND = BR0 + len(BCATS) - 1        # last category row
 BTOT = BEND + 1                    # "total spent"
 DS = BTOT + 2                      # drawdown-by-month section
 NS = BTOT + 9                      # contract N1 section
-XS = BTOT + 16                     # capex/opex section
-N1_OUT = NS + 4                    # contract N1 outstanding
+XS = BTOT + 18                     # capex/opex section
+N1_OUT = NS + 6                    # contracts outstanding, both together
 
 # ---------------- 1. where we are ----------------
 section(bg, 4, "1. სად ვართ / WHERE WE ARE", "F")
@@ -1039,7 +1039,7 @@ for col, h in zip("ABCD", ["მაჩვენებელი / Item", "GEL", "%
 where = [
     ("ბიუჯეტი — კრედიტი / BUDGET — the credit", "=Assumptions!$B$27", LNKB, FILL_KEY),
     ("დახარჯული დღემდე / SPENT to date", f"=B{BTOT}", BOLD, None),
-    ("ვალდებულება — ხელშ. N1-ის ნაშთი / COMMITTED — contract N1 outstanding", f"=D{N1_OUT}", BOLD, None),
+    ("ვალდებულება — ხელშეკრულებების ნაშთი / COMMITTED — contracts outstanding", f"=D{N1_OUT}", BOLD, None),
     ("სულ დახარჯული ან ვალდებული / USED or COMMITTED", "=B7+B8", BOLD, FILL_TOT),
     ("თავისუფალი ნაშთი / FREE budget left", "=B6-B9", BOLD, FILL_TOT),
 ]
@@ -1102,29 +1102,41 @@ put(bg, f"D{DS+5}", f"=$B$6-B{DS+5}", BOLD, fmt=GEL, fill=FILL_TOT, border=BOX, 
 put(bg, f"G{DS+5}", f"C{DS+5} შემოწმებაა — უნდა იყოს 0 / C{DS+5} is a check — it must read 0", NOTE)
 
 # ---------------- 4. contract N1 ----------------
-section(bg, NS, "4. ხელშეკრულება N1 — შპს ჯიესენ გრუპი / CONTRACT N1 — LLC GSN GROUP", "F")
+section(bg, NS, "4. ხელშეკრულებები — შპს ჯიესენ გრუპი / CONTRACTS — LLC GSN GROUP", "F")
 for col, h in zip("ABCD", ["მუხლი / Item", "USD", "კურსი / Rate", "GEL"]):
     put(bg, f"{col}{NS+1}", h, H1, fill=FILL_H, align="center")
-put(bg, f"A{NS+2}", "ჯამური ღირებულება / Total contract value", BOLD, border=BOX)
+put(bg, f"A{NS+2}", "N1 — სათბური / the greenhouse", TXT, border=BOX)
 c = put(bg, f"B{NS+2}", 125000, INPB, fmt='#,##0', border=BOX, align="right")
 c.fill = FILL_KEY
 put(bg, f"C{NS+2}", "=Assumptions!$B$28", LNK, fmt='0.0000', border=BOX, align="right")
-put(bg, f"D{NS+2}", f"=B{NS+2}*Assumptions!$B$28", BOLD, fmt=GEL, border=BOX, align="right")
-put(bg, f"G{NS+2}", "მფლობელის მონაცემი / given by the owner", NOTE)
-put(bg, f"A{NS+3}", "გადახდილი ავანსი / Advances paid", TXT, border=BOX)
+put(bg, f"D{NS+2}", f"=B{NS+2}*Assumptions!$B$28", TXT, fmt=GEL, border=BOX, align="right")
+put(bg, f"G{NS+2}", "ხელშეკრულება N1, 7/6/2026 / contract N1 of 7 June 2026", NOTE)
+put(bg, f"A{NS+3}", "ტექნიკური ოთახი 200 მ² — პერიმეტრის ბეტონი და ბლოკი / "
+                    "technical room 200 m2 — perimeter concrete and blockwork", TXT, border=BOX)
+c = put(bg, f"B{NS+3}", 10000, INPB, fmt='#,##0', border=BOX, align="right")
+c.fill = FILL_KEY
+put(bg, f"C{NS+3}", "=Assumptions!$B$28", LNK, fmt='0.0000', border=BOX, align="right")
+put(bg, f"D{NS+3}", f"=B{NS+3}*Assumptions!$B$28", TXT, fmt=GEL, border=BOX, align="right")
+put(bg, f"G{NS+3}", "მფლობელის მონაცემი 22/09/2026 — ხელშეკრულების ნომერი დასადასტურებელია / "
+                    "owner-reported 22 Sep 2026; the contract reference still needs confirming", NOTE)
+put(bg, f"A{NS+4}", "ჯამი / Total contracted", BOLD, border=BOX)
+put(bg, f"B{NS+4}", f"=B{NS+2}+B{NS+3}", BOLD, fmt='#,##0', border=BOX, align="right")
+put(bg, f"C{NS+4}", "=Assumptions!$B$28", LNK, fmt='0.0000', border=BOX, align="right")
+put(bg, f"D{NS+4}", f"=B{NS+4}*Assumptions!$B$28", BOLD, fmt=GEL, border=BOX, align="right")
+put(bg, f"A{NS+5}", "გადახდილი ავანსი / Advances paid", TXT, border=BOX)
 # The September advance was paid in lari against a contract priced in dollars.
 # It is converted at the contract's own reference rate, so the GEL outstanding
-# on row 34 falls by exactly the 2,900 GEL paid.
-put(bg, f"B{NS+3}", "=22000+5000+40000+2900/Assumptions!$B$28", TXT, fmt='#,##0', border=BOX, align="right")
-put(bg, f"C{NS+3}", f"=IFERROR(D{NS+3}/B{NS+3},0)", TXT, fmt='0.0000', border=BOX, align="right")
-put(bg, f"D{NS+3}", f"=Actuals!B{A_CAT_ROW[CAT_BUILD]}", LNK, fmt=GEL2, border=BOX, align="right")
-put(bg, f"G{NS+3}", "09/07 — 22,000 $ · 04/08 — 5,000 $ · 14/09 — 2,900 ₾ ≈ 1,099 $ (ერ.კ. 2.6384) · 19/09 — 40,000 $ ერ.კ. 2.6125", NOTE)
-put(bg, f"A{NS+4}", "დარჩენილი გადასახდელი / Outstanding", BOLD, fill=FILL_TOT, border=BOX)
-put(bg, f"B{NS+4}", f"=B{NS+2}-B{NS+3}", BOLD, fmt='#,##0', fill=FILL_TOT, border=BOX, align="right")
-put(bg, f"C{NS+4}", "=Assumptions!$B$28", LNK, fmt='0.0000', fill=FILL_TOT, border=BOX, align="right")
-put(bg, f"D{NS+4}", f"=B{NS+4}*Assumptions!$B$28", BOLD, fmt=GEL, fill=FILL_TOT, border=BOX, align="right")
-put(bg, f"A{NS+5}", "შესრულების წილი / Share of the contract paid", BOLD, border=BOX)
-put(bg, f"B{NS+5}", f"=IFERROR(B{NS+3}/B{NS+2},0)", BOLD, fmt=PCT, border=BOX, align="right")
+# falls by exactly the 2,900 GEL paid.
+put(bg, f"B{NS+5}", "=22000+5000+40000+2900/Assumptions!$B$28", TXT, fmt='#,##0', border=BOX, align="right")
+put(bg, f"C{NS+5}", f"=IFERROR(D{NS+5}/B{NS+5},0)", TXT, fmt='0.0000', border=BOX, align="right")
+put(bg, f"D{NS+5}", f"=Actuals!B{A_CAT_ROW[CAT_BUILD]}", LNK, fmt=GEL2, border=BOX, align="right")
+put(bg, f"G{NS+5}", "09/07 — 22,000 $ · 04/08 — 5,000 $ · 14/09 — 2,900 ₾ ≈ 1,099 $ (ერ.კ. 2.6384) · 19/09 — 40,000 $ ერ.კ. 2.6125 · ყველა N1-ზე / all against N1", NOTE)
+put(bg, f"A{NS+6}", "დარჩენილი გადასახდელი / Outstanding", BOLD, fill=FILL_TOT, border=BOX)
+put(bg, f"B{NS+6}", f"=B{NS+4}-B{NS+5}", BOLD, fmt='#,##0', fill=FILL_TOT, border=BOX, align="right")
+put(bg, f"C{NS+6}", "=Assumptions!$B$28", LNK, fmt='0.0000', fill=FILL_TOT, border=BOX, align="right")
+put(bg, f"D{NS+6}", f"=B{NS+6}*Assumptions!$B$28", BOLD, fmt=GEL, fill=FILL_TOT, border=BOX, align="right")
+put(bg, f"A{NS+7}", "შესრულების წილი / Share of the contracted work paid", BOLD, border=BOX)
+put(bg, f"B{NS+7}", f"=IFERROR(B{NS+5}/B{NS+4},0)", BOLD, fmt=PCT, border=BOX, align="right")
 
 # ---------------- 5. capital vs operating ----------------
 section(bg, XS, "5. კაპიტალური თუ საოპერაციო / CAPITAL OR OPERATING", "F")
