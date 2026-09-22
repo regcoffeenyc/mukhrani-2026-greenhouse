@@ -46,6 +46,31 @@ A new organisation starts on the **Free** plan: 1,000 operations a month. The bo
 costs about 6 operations per expense logged and 5 per `/balance`, so 1,000 covers
 roughly 150 expenses a month. Nothing needs to be paid for.
 
+## Where the migration got to
+
+On 22 September 2026 the owner created the organisation and re-authorised the Make
+connector, which moved its scope to the new organisation. Built there since:
+
+| | |
+|---|---|
+| Organisation | `Mukhrani greenhouse`, id `9072742` |
+| Team | `My Team`, id `2902260` |
+| Scenario | `7551201` — built, **inactive**, waiting on connections |
+| Webhook | `3768452` · `https://hook.eu1.make.com/x6fymtk1qp1ony7meac363e6b317n2d5` — no API key auth |
+
+**Still to do:** create the three connections (step 2), attach them (step 3),
+point Telegram at the new hook (step 4), test (step 5), delete the old scenario
+and hook (step 6).
+
+**A trap to know about.** Re-authorising the connector *moved* its scope rather
+than widening it: it now reaches `Mukhrani greenhouse` and no longer reaches
+`My Organization`. So step 6 — deleting scenario `7471723` and hook `3740894`
+from the shop — cannot be done from the new scope. Either do it by hand in the
+Make UI, or re-authorise back once the greenhouse side is proven. Until the old
+scenario is switched off, **both bots are pointed at the same ledger**; only one
+can hold the Telegram webhook at a time, so whichever `setWebhook` ran last wins,
+but the loser is still live and still able to write if it is ever re-pointed.
+
 ## The steps
 
 ### 1. Create the organisation — in the browser
