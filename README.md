@@ -11,13 +11,13 @@ LLC Mukhrani 2026 (ID 404801602) · hydroponic greenhouse · 625,000 GEL budget
 | | ₾ | ბიუჯეტიდან / of budget |
 |---|---:|---:|
 | ბიუჯეტი — კრედიტი / Budget — the credit | 625,000.00 | 100.0% |
-| დახარჯული / Spent | 220,061.64 | 35.2% |
+| დახარჯული / Spent | 220,261.64 | 35.2% |
 | ვალდებული — ხელშ. N1 / Committed — contract N1 | 150,127.20 | 24.0% |
-| **დახარჯული ან ვალდებული / Used or committed** | **370,188.84** | **59.2%** |
-| **თავისუფალი / Free** | **254,811.16** | **40.8%** |
+| **დახარჯული ან ვალდებული / Used or committed** | **370,388.84** | **59.3%** |
+| **თავისუფალი / Free** | **254,611.16** | **40.7%** |
 
-*22 სექტემბერი 2026 · 30 საბანკო გადარიცხვა + 20 საწვავის ჩასხმა / as at 22 September 2026 —
-30 bank payments plus 20 fuel-card fills. ორი საბანკო ჩანაწერი (19 და 21/09) მფლობელის
+*22 სექტემბერი 2026 · 30 საბანკო გადარიცხვა + 21 საწვავი / as at 22 September 2026 —
+30 bank payments plus 21 fuel entries. ორი საბანკო ჩანაწერი (19 და 21/09) მფლობელის
 მონაცემია; საწვავი აპლიკაციიდანაა და ამონაწერში არ ჩანს. Two bank rows (19 and 21 Sep) are
 owner-reported; the fuel comes from the fuel app and does not appear in the bank statement.*
 

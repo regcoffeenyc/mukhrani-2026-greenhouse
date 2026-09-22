@@ -827,7 +827,7 @@ meta = [
     ("ანგარიში / Account", "GE66CR0000009572073602"),
     ("მფლობელი / Account name", "შპს მუხრანი 2026 / LLC Mukhrani 2026"),
     ("მოთხოვნილი პერიოდი / Period requested", "01/04/2026 – 21/09/2026"),
-    ("ფაქტობრივი ჩანაწერები / Entries present", "01/07/2026 – 21/09/2026 · 30 საბანკო + 20 საწვავი / 30 bank + 20 fuel-card"),
+    ("ფაქტობრივი ჩანაწერები / Entries present", "01/07/2026 – 22/09/2026 · 30 საბანკო + 21 საწვავი / 30 bank + 21 fuel"),
     ("ჩარიცხვა / Inflow", "14/09/2026 — 30,000 ₾, კრედიტის ტრანში GA/1-876787-001 — ხარჯი არ არის, ქვემოთ არ ითვლება / "
                           "a tranche of the credit, not an expense, excluded below"),
 ]
@@ -911,6 +911,8 @@ txns = [
     (date(2026, 9, 11), "საწვავი G-Force Premium 50 ლ — PIKRIS GORA", "", CAT_FUEL, -192.50),
     (date(2026, 9, 14), "საწვავი G-Force Premium 65 ლ — TSEROVANI", "", CAT_FUEL, -250.25),
     (date(2026, 9, 17), "საწვავი G-Force Premium 50 ლ — NAREKVAVI", "", CAT_FUEL, -192.50),
+    # მფლობელის მონაცემი / reported by the owner, 22 September — no litres or station given
+    (date(2026, 9, 22), "საწვავი", "", CAT_FUEL, -200.00),
 ]
 TR0 = 13
 for i, (d, desc, cp, cat, amt) in enumerate(txns):
