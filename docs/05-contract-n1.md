@@ -22,7 +22,14 @@ Drive, 14 pages. Every figure below is read off the document.
   engineering and construction.
 - **4.5 — თანხები დღგ-ს არ მოიცავს და დღგ-ს გადახდა დამკვეთს ევალება.** /
   **The price excludes VAT, and paying VAT is the client's obligation.** At 18%
-  that is 22,500 USD on top of the 125,000 — it is not in the budget line today.
+  that would be 22,500 USD on top of the 125,000.
+  **მფლობელი 26/10/2026: დღგ ჯიესენის მხარეა — 125,000 $ საბოლოა.**
+  ეს ხელშეკრულების ტექსტს ეწჭვება, ამიტომ წერილობით დასადასტურებელია —
+  დამატებითი შეთანხმებით ან ინვოისით, სადაც დღგ შესრულებელის მხრიდან იწერება.
+  / **The owner's position, 26 October 2026: VAT is GSN's side, so 125,000 USD is
+  the all-in cost.** That contradicts the signed clause, so it needs to be papered
+  — an addendum, or at minimum an invoice showing the VAT borne by the contractor.
+  At closure the signed text is what governs, not the understanding.
 - **4.3** — გადახდა ლარში, ეროვნული ბანკის ოფიციალური კურსით გადახდის დღეს, თუ
   მხარეები წერილობით სხვაგვარად არ შეთანხმდნენ. / Payments in GEL at the NBG
   rate of the day of payment, unless agreed otherwise in writing.
@@ -145,8 +152,11 @@ credits 40,082.85 rather than 40,000. The net is 73.52 USD in the client's favou
 Reconcile the basis with GSN before the final transfer, because it decides the
 last invoice.
 
-**დღგ აქან გამორიცხულია (4.5).** / **VAT is excluded from all of the above (4.5).**
-18% — 22,500 $.
+**დღგ აქ არ არის მიმატებული.** მფლობელის თქმით დღგ ჯიესენის მხარეა,
+ამიტომ ზემოთ არაფერი ემატება. ხელშეკრულების 4.5 სხვას ამბობს — იხ. ზემოთ.
+/ **No VAT is added above.** On the owner's instruction VAT is GSN's, so nothing
+is added to the closing figure. Clause 4.5 says the opposite — see the money
+section. If that is ever enforced, add 22,500 USD.
 
 ## სანამ გადაიხდით / Before the next payment
 
@@ -172,9 +182,11 @@ the 104,500 of 21 September, which is why its USD figure rests on memory alone.
 
 ## ღია საკითხები / Open questions
 
-1. **დღგ.** 4.5 ამბობს, რომ ფასი დღგ-ს არ მოიცავს და გადახდა დამკვეთისაა. 18%
-   125,000-ზე = 22,500 $. ბიუჯეტში არ დევს. / Not in the budget. Settle it in
-   writing with GSN before the next payment.
+1. **დღგ — გასაცილკებელია ქაღალდე.** მფლობელი 26/10/2026: დღგ ჯიესენის
+   მხარეა. ხელშეკრულების 4.5 კი ამბობს, რომ გადახდა დამკვეთს ევალება.
+   სხვაობა 18% = 22,500 $. / The owner says VAT is GSN's; clause 4.5 says it is
+   the client's. The gap is 22,500 USD, so get the owner's position into a signed
+   addendum or a VAT-bearing invoice rather than leaving it on a handshake.
 2. **3 თუ 4 ეტაპი** — სხეული და დანართი ეწინააღმდეგებიან.
 3. **45 თუ 65 დღე** — იგივე.
 4. **დაწყების თარიღი „25 ივლისი 2025"** — თარიღის შეცდომა, გასასწორებელია
