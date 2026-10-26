@@ -119,6 +119,35 @@ to be credited against a stage.
 20%-იანი ავანსი (25,000 $) 4 აგვისტოსთვის დაფარული იყო — 22,000 + 5,000 = 27,000 $.
 / The 20% advance was satisfied by 4 August.
 
+## დახურვა ეროვნული ბანკის კურსით / The balance on the contract's own FX rule
+
+4.3 ამბობს, რომ გადახდა ლარშია, ეროვნული ბანკის ოფიციალური კურსით **გადახდის დღეს**.
+მაშინ დოლარში ჩათვლა არის ეს: / Clause 4.3 settles in lari at the NBG rate of the
+day of payment, so the dollar credit for each transfer is this:
+
+| თარიღი / Date | ₾ | კურსი / NBG | $ |
+|---|---:|---:|---:|
+| 09/07/2026 | 58,044.80 | 2.6384 | 22,000.00 |
+| 04/08/2026 | 13,100.00 | 2.6249 | 4,990.67 |
+| 14/09/2026 | 1,500.00 | 2.6095 | 574.82 |
+| 14/09/2026 | 1,400.00 | 2.6095 | 536.50 |
+| 21/09/2026 | 104,500.00 | 2.6071 | 40,082.85 |
+| **სულ / Total** | **178,544.80** | | **68,184.84** |
+
+დარჩენილი / outstanding: **125,000 − 68,184.84 = 56,815.16 $**.
+
+ორი ჩანაწერი განსხვავდება ლეჯერში დაფიქსირებულს: 04/08-ის 13,100 ₾ ეროვნული
+ბანკის კურსით 4,990.67 $-ია, არა 5,000; 21/09-ის 104,500 ₾ — 40,082.85 $, არა 40,000.
+სხვაობა საერთოდ +73.52 $ დამკვეთის სასიკეთოა. / Two rows differ from what the
+ledger records: the 13,100 of 4 August credits 4,990.67 USD at the NBG rate rather
+than the 5,000 its payment description claims, and the 104,500 of 21 September
+credits 40,082.85 rather than 40,000. The net is 73.52 USD in the client's favour.
+Reconcile the basis with GSN before the final transfer, because it decides the
+last invoice.
+
+**დღგ აქან გამორიცხულია (4.5).** / **VAT is excluded from all of the above (4.5).**
+18% — 22,500 $.
+
 ## სანამ გადაიხდით / Before the next payment
 
 ხელშეკრულება გადახდას დოკუმენტს აბამს, არა თხოვნას. სანამ თანხა გავა, ხელთ
