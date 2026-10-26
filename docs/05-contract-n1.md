@@ -30,8 +30,7 @@ Drive, 14 pages. Every figure below is read off the document.
   A 20% advance before work starts.
 - **დანართი §5 — შრომითი ანაზღაურება 15,000 $**; I–IV ეტაპის აქტების შემდეგ
   დამკვეთი იხდის მის **30%-ს**. / Labour remuneration of 15,000 USD, 30% of it
-  payable once the Stage I–IV acts are signed. Whether this sits inside the
-  125,000 or on top of it is not stated — ask GSN in writing.
+  payable once the Stage I–IV acts are signed. **მფლობელის დადასტურებით 26/10/2026 — ეს 15,000 $ 125,000-ის შიგნითაა, არა ზემოდან.** ესე იყოფა: 110,000 $ — მასალა, მოწყობილობა და მიწოდება; 15,000 $ — შრომა. / **Confirmed by the owner on 26 October 2026: the 15,000 is inside the 125,000, not on top of it.** The price therefore splits 110,000 USD of materials, equipment and supply against 15,000 USD of labour, and the 30% labour tranche of 4,500 USD is a milestone within the price, not an addition to it.
 - **6.5 — იმპორტირებული მასალა**: დამკვეთი სრულად იხდის საქართველოს საბაჟო
   საზღვარზე შემოსვლისა და განბაჟების დაწყების მომენტისთვის, შემსრულებლის
   შეტყობინების ან სატრანსპორტო-საბაჟო დოკუმენტაციის წარდგენიდან **3 სამუშაო
@@ -147,17 +146,16 @@ the 104,500 of 21 September, which is why its USD figure rests on memory alone.
 1. **დღგ.** 4.5 ამბობს, რომ ფასი დღგ-ს არ მოიცავს და გადახდა დამკვეთისაა. 18%
    125,000-ზე = 22,500 $. ბიუჯეტში არ დევს. / Not in the budget. Settle it in
    writing with GSN before the next payment.
-2. **15,000 $ შრომითი ანაზღაურება** — 125,000-ის შიგნითაა თუ ზემოდან?
-3. **3 თუ 4 ეტაპი** — სხეული და დანართი ეწინააღმდეგებიან.
-4. **45 თუ 65 დღე** — იგივე.
-5. **დაწყების თარიღი „25 ივლისი 2025"** — თარიღის შეცდომა, გასასწორებელია
+2. **3 თუ 4 ეტაპი** — სხეული და დანართი ეწინააღმდეგებიან.
+3. **45 თუ 65 დღე** — იგივე.
+4. **დაწყების თარიღი „25 ივლისი 2025"** — თარიღის შეცდომა, გასასწორებელია
    დამატებითი შეთანხმებით, რადგან მასზეა მიბმული 8.2-ის ჯარიმა. / The start date
    reads 2025. Fix it by addendum: the delay penalty hangs off it.
-6. **შემსრულებლის რეკვიზიტები §15-ში ცარიელია** — მისამართი, ბანკი, ანგარიში
+5. **შემსრულებლის რეკვიზიტები §15-ში ცარიელია** — მისამართი, ბანკი, ანგარიში
    შეუვსებელია ხელმოწერილ ასლში. / GSN's address, bank and account lines are
    blank on the signed copy.
-7. **სკანში ნუმერაცია 11.1-დან 14.3-ზე ხტება** — გვერდი აკლია თუ ნუმერაცია
+6. **სკანში ნუმერაცია 11.1-დან 14.3-ზე ხტება** — გვერდი აკლია თუ ნუმერაცია
    ასეთია, გადასამოწმებელია ორიგინალზე. / The scan jumps from 11.1 to 14.3; check
    the original for a missing page.
-8. **ტექნიკური ოთახი, 10,000 $** — ცალკე ხელშეკრულებაა და Drive-ზე არ მოიძებნა.
+7. **ტექნიკური ოთახი, 10,000 $** — ცალკე ხელშეკრულებაა და Drive-ზე არ მოიძებნა.
    / The technical room is a separate agreement and is not on Drive.
