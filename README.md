@@ -11,24 +11,37 @@ LLC Mukhrani 2026 (ID 404801602) · hydroponic greenhouse · 625,000 GEL budget
 | | ₾ | ბიუჯეტიდან / of budget |
 |---|---:|---:|
 | ბიუჯეტი — კრედიტი / Budget — the credit | 625,000.00 | 100.0% |
-| დახარჯული / Spent | 210,261.64 | 33.6% |
+| დახარჯული / Spent | 261,618.56 | 41.9% |
 | ავანსი დირექტორზე, ანგარიშგების გარეშე / Advance not yet accounted | 6,980.35 | 1.1% |
 | ვალდებული — ხელშეკრულებები / Committed — contracts | 176,511.20 | 28.2% |
-| **დახარჯული ან ვალდებული / Used or committed** | **393,753.19** | **63.0%** |
-| **თავისუფალი / Free** | **231,246.81** | **37.0%** |
+| **დახარჯული ან ვალდებული / Used or committed** | **445,110.11** | **71.2%** |
+| **თავისუფალი / Free** | **179,889.89** | **28.8%** |
 
-*22 სექტემბერი 2026 · 30 საბანკო გადარიცხვა + 21 საწვავი / as at 22 September 2026 —
-30 bank payments plus 21 fuel entries. ორი საბანკო ჩანაწერი (19 და 21/09) მფლობელის
-მონაცემია; საწვავი აპლიკაციიდანაა და ამონაწერში არ ჩანს. Two bank rows (19 and 21 Sep) are
-owner-reported; the fuel comes from the fuel app and does not appear in the bank statement.*
+*26 ოქტომბერი 2026 · 65 საბანკო ჩანაწერი + 21 საწვავი + 2 გადახდის ხერხის გარეშე ·
+ანგარიშის ნაშთი 30,484.09 ₾ / as at 26 October 2026 — 65 bank rows, 21 fuel entries and
+2 rows with no payment method; the account itself stood at 30,484.09 GEL at 09:55 that
+morning. ორი საბანკო ჩანაწერი (19 და 21/09) მფლობელის მონაცემია; საწვავი აპლიკაციიდანაა
+და ამონაწერში არ ჩანს. Two bank rows (19 and 21 Sep) are owner-reported; the fuel comes
+from the fuel app and does not appear in the bank statement. The import log is in
+`docs/04-bank-import.md`.*
 
 **შემოწმება / The reconciliation that ties it together.** დახარჯული + ავანსის
-აუთვისებელი ნაწილი = 210,261.64 + 6,980.35 = **217,241.99 ₾**, რაც ზუსტად
-უდრის ბანკიდან გასულ თანხას. / Spend plus the unaccounted part of the advance
-equals 217,241.99 GEL — exactly the total paid out of account GE66…3602. The
-fuel adds nothing on top because all of it was funded from the advance: 2,819.65
-was paid personally before 21 September and repaid out of it, and 200 came from
-it directly. Nothing is owed to the director.
+აუთვისებელი ნაწილი − ორი ჩანაწერი გადახდის ხერხის გარეშე = 261,618.56 + 6,980.35
+− 450.00 = **268,148.91 ₾**, რაც ზუსტად უდრის ანგარიშ GE66…3602-იდან გასულ
+თანხას 01/07/2026-დან. / Spend plus the unaccounted part of the advance, less the
+two rows that have no payment method, equals 268,148.91 GEL — exactly the total
+paid out of account GE66…3602 since 1 July 2026. The fuel adds nothing on top
+because all of it was funded from the advance: 2,819.65 was paid personally before
+21 September and repaid out of it, and 200 came from it directly. Nothing is owed
+to the director.
+
+ის ორი ჩანაწერი (24/09, ცემენტი 150 + 300 ₾, ტელეგრამიდან, ხერხი `unknown`) შეიძლება
+იგივე ცემენტი იყოს, რაც 25/09-ის საბანკო ჩანაწერში 435 ₾-ად დევს. თუ ასეა, 450 ₾
+ორჯერ ითვლება და ზედმეტი `void`-ად უნდა მოინიშნოს. / Those two rows — 24 September,
+cement for 150 and 300 GEL, logged from Telegram with method `unknown` — may be the
+same cement that the bank row of 25 September records as 435 GEL. If they are, 450 GEL
+is counted twice and the duplicate should be flagged `void`. It is the one open
+question in the figures above.
 
 ## რა დევს აქ / What is here
 
@@ -103,6 +116,7 @@ the bot could not read with confidence — see `docs/02-setup.md` §8.
 | ბოტის აწყობა / to set up the bot | `docs/02-setup.md` |
 | როგორ მუშაობს / to understand how it works | `docs/01-architecture.md` |
 | მოდელის თავიდან აგება / to rebuild the model | `finance/README.md` |
+| სად ჩერდება ლეჯერი ამონაწერში / where the ledger stands against the bank | `docs/04-bank-import.md` |
 
 ## წყაროები / Sources
 
@@ -111,7 +125,8 @@ the bot could not read with confidence — see `docs/02-setup.md` §8.
 | | |
 |---|---|
 | ბიუჯეტი / Budget | სესხის ხელშეკრულება GA/1-876787–001, 17/06/2026, სს „ბანკი ქართუ" |
-| ხარჯი / Spend | ბანკის ამონაწერი, ანგარიში GE66CR0000009572073602, 01/07–18/09/2026; 19–21/09 მფლობელის მონაცემი |
+| ხარჯი / Spend | ბანკის ამონაწერი, ანგარიში GE66CR0000009572073602, 01/07–22/10/2026; 19 და 21/09 მფლობელის მონაცემი / bank statements for the account, 1 July to 22 October 2026; the 19 and 21 September rows are owner-reported |
+| საწვავი / Fuel | Gulf-ის აპლიკაცია, 02/07–22/09/2026 — ბარათით, ამონაწერში არ ჩანს / the Gulf fuel app, paid by card and absent from the bank statement |
 | ხელშეკრულება N1 / Contract N1 | შპს ჯიესენ გრუპი, 7/6/2026, 125,000 $ — სათბური / the greenhouse |
 | ტექნიკური ოთახი / Technical room | შპს ჯიესენ გრუპი, 10,000 $ — 200 მ², პერიმეტრის ბეტონი და ბლოკი; ნომერი დასადასტურებელია / contract reference to be confirmed |
 | კურსი / FX 2.6384 | 09/07/2026 გადარიცხვის დანიშნულება / stated in the payment description |

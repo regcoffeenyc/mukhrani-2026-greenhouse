@@ -140,7 +140,7 @@ project: do not switch it back on.
 | Send | Expect |
 |---|---|
 | `/help` | the command list |
-| `/balance` | **one** message: spent 220,261.64 ₾ · left 404,738.36 ₾ · 51 records |
+| `/balance` | **one** message, matching `summary!A1` and `summary!A2` of the ledger sheet — at 26/10/2026 that was spent 261,618.56 ₾ · left 363,381.44 ₾ · 88 records. The figure moves with every import, so check it against the sheet, not against this page. |
 | `/blocks 180 0.8` | 1,757 blocks · 17 bags of cement · 2.5 m³ sand |
 | `/foundation 180 0.4 0.5` | 37.8 m³ concrete · 257 bags · 1,133 kg rebar |
 | `ბეტონი 250 ლარი` | ✅ logged, materials, CAPEX — check the row landed in the sheet |
