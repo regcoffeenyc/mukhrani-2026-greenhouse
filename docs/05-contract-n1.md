@@ -116,12 +116,13 @@ licences and design documentation are the client's too.
 | 14/09/2026 | 1,500.00 | — | 1 | ამონაწერი / statement |
 | 14/09/2026 | 1,400.00 | — | 1 | ამონაწერი / statement |
 | 21/09/2026 | 104,500.00 | 40,000 | 2.6125 | ამონაწერი; $ და კურსი მფლობელისა / statement; the USD figure and rate are owner-reported |
-| **სულ / Total** | **178,544.80** | **67,000** | | |
+| 26/10/2026 | 52,000.00 | — | 1 | მფლობელი; ამონაწერით დასადასტურებელია / owner-reported, awaiting the next statement |
+| **სულ / Total** | **230,544.80** | | | |
 
-67,000 $ = **125,000-ის 53.6%**. დარჩენილი **58,000 $**, პლუს ლარში გადახდილი
-2,900 ₾, რომელიც რომელიღაც ეტაპს უნდა მიეწეროს. / 67,000 USD is 53.6% of the
-contract. 58,000 USD is outstanding, plus the 2,900 GEL paid in lari that needs
-to be credited against a stage.
+ეროვნული ბანკის კურსით (მუხლი 4.3) ეს არის **88,207.17 $ = 125,000-ის 70.6%**.
+დარჩენილი **36,792.83 $**. / Valued at the NBG rate each payment day, as clause 4.3
+requires, that is 88,207.17 USD or 70.6% of the contract, leaving 36,792.83 USD
+outstanding. The table below does the conversion payment by payment.
 
 20%-იანი ავანსი (25,000 $) 4 აგვისტოსთვის დაფარული იყო — 22,000 + 5,000 = 27,000 $.
 / The 20% advance was satisfied by 4 August.
@@ -139,9 +140,13 @@ day of payment, so the dollar credit for each transfer is this:
 | 14/09/2026 | 1,500.00 | 2.6095 | 574.82 |
 | 14/09/2026 | 1,400.00 | 2.6095 | 536.50 |
 | 21/09/2026 | 104,500.00 | 2.6071 | 40,082.85 |
-| **სულ / Total** | **178,544.80** | | **68,184.84** |
+| 26/10/2026 | 52,000.00 | 2.5971 | 20,022.33 |
+| **სულ / Total** | **230,544.80** | | **88,207.17** |
 
-დარჩენილი / outstanding: **125,000 − 68,184.84 = 56,815.16 $**.
+დარჩენილი / outstanding: **125,000 − 88,207.17 = 36,792.83 $**
+(≈ 95,554.65 ₾ 2.5971-ით; ლარის თანხა დახურვის დღის კურსზე იქნება დამოკიდებული /
+about 95,554.65 GEL at 2.5971, but the lari figure follows the rate on the day
+the last payment settles).
 
 ორი ჩანაწერი განსხვავდება ლეჯერში დაფიქსირებულს: 04/08-ის 13,100 ₾ ეროვნული
 ბანკის კურსით 4,990.67 $-ია, არა 5,000; 21/09-ის 104,500 ₾ — 40,082.85 $, არა 40,000.

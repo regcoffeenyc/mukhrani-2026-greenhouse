@@ -11,26 +11,30 @@ LLC Mukhrani 2026 (ID 404801602) · hydroponic greenhouse · 625,000 GEL budget
 | | ₾ | ბიუჯეტიდან / of budget |
 |---|---:|---:|
 | ბიუჯეტი — კრედიტი / Budget — the credit | 625,000.00 | 100.0% |
-| დახარჯული / Spent | 261,618.56 | 41.9% |
+| დახარჯული / Spent | 313,618.56 | 50.2% |
 | ავანსი დირექტორზე, ანგარიშგების გარეშე / Advance not yet accounted | 6,980.35 | 1.1% |
-| ვალდებული — ხელშეკრულებები / Committed — contracts | 176,511.20 | 28.2% |
-| **დახარჯული ან ვალდებული / Used or committed** | **445,110.11** | **71.2%** |
-| **თავისუფალი / Free** | **179,889.89** | **28.8%** |
+| ვალდებული — ხელშეკრულებები / Committed — contracts | 121,525.65 | 19.4% |
+| **დახარჯული ან ვალდებული / Used or committed** | **442,124.56** | **70.7%** |
+| **თავისუფალი / Free** | **182,875.44** | **29.3%** |
 
-*26 ოქტომბერი 2026 · 65 საბანკო ჩანაწერი + 21 საწვავი + 2 გადახდის ხერხის გარეშე ·
+*26 ოქტომბერი 2026 · 66 საბანკო ჩანაწერი + 21 საწვავი + 2 გადახდის ხერხის გარეშე ·
 ანგარიშის ნაშთი 30,484.09 ₾ / as at 26 October 2026 — 65 bank rows, 21 fuel entries and
 2 rows with no payment method; the account itself stood at 30,484.09 GEL at 09:55 that
-morning. ორი საბანკო ჩანაწერი (19 და 21/09) მფლობელის მონაცემია; საწვავი აპლიკაციიდანაა
-და ამონაწერში არ ჩანს. Two bank rows (19 and 21 Sep) are owner-reported; the fuel comes
-from the fuel app and does not appear in the bank statement. The import log is in
+morning. და მას შემდეგ, 26/10-ს, ჯიესენზე 52,000 ₾ გავიდა — მფლობელის
+მონაცემით, შემდეგ ამონაწერით დასადასტურებელი. / A further 52,000 GEL went to GSN
+on 26 October on the owner's word, to be confirmed by the next statement. The
+account itself held only 30,484.09 that morning, so a drawdown should appear
+beside it. Two September bank rows are owner-reported; the fuel comes from the
+fuel app and does not appear in the bank statement. The import log is in
 `docs/04-bank-import.md`.*
 
 **შემოწმება / The reconciliation that ties it together.** დახარჯული + ავანსის
-აუთვისებელი ნაწილი − ორი ჩანაწერი გადახდის ხერხის გარეშე = 261,618.56 + 6,980.35
-− 450.00 = **268,148.91 ₾**, რაც ზუსტად უდრის ანგარიშ GE66…3602-იდან გასულ
-თანხას 01/07/2026-დან. / Spend plus the unaccounted part of the advance, less the
-two rows that have no payment method, equals 268,148.91 GEL — exactly the total
-paid out of account GE66…3602 since 1 July 2026. The fuel adds nothing on top
+აუთვისებელი ნაწილი − ორი ჩანაწერი გადახდის ხერხის გარეშე = 313,618.56 + 6,980.35
+− 450.00 = **320,148.91 ₾**. ამისგან 268,148.91 ₾ ამონაწერებით დასტურდა
+22/10-ის ჩათვლით, 52,000 ₾ — ტერიტორიალურია. / Spend plus the unaccounted part
+of the advance, less the two rows that have no payment method, equals 320,148.91
+GEL. Of that, 268,148.91 is confirmed by statements through 22 October and the
+52,000 of 26 October is still on the owner's word alone. The fuel adds nothing on top
 because all of it was funded from the advance: 2,819.65 was paid personally before
 21 September and repaid out of it, and 200 came from it directly. Nothing is owed
 to the director.

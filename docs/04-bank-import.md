@@ -26,6 +26,14 @@ GE66CR0000009572073602 (GEL) · შპს მუხრანი 2026 · სს �
 იწყება. / **The ledger is complete through 22 October 2026.** The next import
 starts at 23 October.
 
+ხოლო 26/10/2026-ის 52,000 ₾ (ჯიესენი, ხელშ. N1) მფლობელის სიტყვით დევს —
+`owner_reported`. შემდეგ ამონაწერში უნდა გამოჩნდეს სამი: ეს გადარიცხვა,
+მისი საკომისიო და სესხის ათვისება — 26/10 დილით ანგარიშზე 30,484.09 ₾ იდევდა.
+/ The 52,000 GEL paid to GSN on 26 October sits in the ledger as
+`owner_reported`. Three things should appear together on the next statement: the
+payment, its commission, and a drawdown — the account held only 30,484.09 that
+morning.
+
 26/10/2026-ის ამონაწერი (04/08–26/10) ზუსტად შედგა: 110 ხაზი, დებეტი
 199,246.03 ₾, კრედიტი 213,583.00 ₾, ნაშთი 16,147.12 → 30,484.09 ₾, ყველა ხაზი
 მიმდევრობით გადამოწმებული. / The 26 October statement (4 August to 26 October)
