@@ -117,6 +117,7 @@ the bot could not read with confidence — see `docs/02-setup.md` §8.
 | როგორ მუშაობს / to understand how it works | `docs/01-architecture.md` |
 | მოდელის თავიდან აგება / to rebuild the model | `finance/README.md` |
 | სად ჩერდება ლეჯერი ამონაწერში / where the ledger stands against the bank | `docs/04-bank-import.md` |
+| რა წერია ჯიესენის ხელშეკრულებაში / what the GSN contract actually says | `docs/05-contract-n1.md` |
 
 ## წყაროები / Sources
 
@@ -127,7 +128,7 @@ the bot could not read with confidence — see `docs/02-setup.md` §8.
 | ბიუჯეტი / Budget | სესხის ხელშეკრულება GA/1-876787–001, 17/06/2026, სს „ბანკი ქართუ" |
 | ხარჯი / Spend | ბანკის ამონაწერი, ანგარიში GE66CR0000009572073602, 01/07–22/10/2026; 19 და 21/09 მფლობელის მონაცემი / bank statements for the account, 1 July to 22 October 2026; the 19 and 21 September rows are owner-reported |
 | საწვავი / Fuel | Gulf-ის აპლიკაცია, 02/07–22/09/2026 — ბარათით, ამონაწერში არ ჩანს / the Gulf fuel app, paid by card and absent from the bank statement |
-| ხელშეკრულება N1 / Contract N1 | შპს ჯიესენ გრუპი, 7/6/2026, 125,000 $ — სათბური / the greenhouse |
+| ხელშეკრულება N1 / Contract N1 | შპს ჯიესენ გრუპი (ს/კ 406230528), 7/6/2026, 125,000 $ **დღგ-ს გარეშე** — სათბური; პირობები `docs/05-contract-n1.md` / the greenhouse, price **excluding VAT**; terms in `docs/05-contract-n1.md` |
 | ტექნიკური ოთახი / Technical room | შპს ჯიესენ გრუპი, 10,000 $ — 200 მ², პერიმეტრის ბეტონი და ბლოკი; ნომერი დასადასტურებელია / contract reference to be confirmed |
 | კურსი / FX 2.6384 | 09/07/2026 გადარიცხვის დანიშნულება / stated in the payment description |
 

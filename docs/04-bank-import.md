@@ -100,6 +100,11 @@ and belongs outside it: it was funded from the advance.
 4. **ტექნიკური ოთახი.** 10,000 $ ხელშეკრულების ნომერი ჯერ უცნობია; გადახდა არ
    ჩანს. / The 10,000 USD technical-room contract still has no reference and no
    payment against it.
+5. **დღგ ხელშეკრულება N1-ზე.** ფასი დღგ-ს არ მოიცავს და მისი გადახდა
+   დამკვეთს ევალება (4.5) — 18% 125,000-ზე = 22,500 $, რომელიც ბიუჯეტში
+   არ დევს. / **VAT on contract N1.** Clause 4.5 puts VAT outside the price and
+   on the client: 22,500 USD at 18%, nowhere in the budget. See
+   `docs/05-contract-n1.md`.
 
 ## `sheets/expenses-ledger-template.csv`
 
